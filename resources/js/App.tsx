@@ -1,6 +1,7 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Welcome from "./pages/Welcome";
 import DashboardsHome from "./pages/DashboardsHome";
 import DashboardView from "./pages/DashboardView";
 import AuditPlansList from "./pages/AuditPlansList";
@@ -9,44 +10,95 @@ import NewAuditPlan from "./pages/NewAuditPlan";
 
 const queryClient = new QueryClient();
 
+// Navigation component that uses useLocation
+function Navigation() {
+    const location = useLocation();
+
+    return (
+        <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+            <div className="container-fluid">
+                <Link className="navbar-brand fw-bold" to="/">
+                    <i className="fas fa-shield-alt me-2"></i>
+                    INRM System
+                </Link>
+
+                <button
+                    className="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav"
+                    aria-controls="navbarNav"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+                >
+                    <span className="navbar-toggler-icon"></span>
+                </button>
+
+                <div className="collapse navbar-collapse" id="navbarNav">
+                    <ul className="navbar-nav me-auto">
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+                                to="/"
+                            >
+                                <i className="fas fa-home me-1"></i>
+                                Home
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link ${location.pathname.startsWith('/dashboards') ? 'active' : ''}`}
+                                to="/dashboards"
+                            >
+                                <i className="fas fa-chart-line me-1"></i>
+                                Dashboards
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link ${location.pathname.startsWith('/audits') ? 'active' : ''}`}
+                                to="/audits/plans"
+                            >
+                                <i className="fas fa-clipboard-check me-1"></i>
+                                Audit Plans
+                            </Link>
+                        </li>
+                    </ul>
+
+                    <ul className="navbar-nav">
+                        <li className="nav-item dropdown">
+                            <button
+                                className="btn btn-outline-light dropdown-toggle"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                            >
+                                <i className="fas fa-user me-1"></i>
+                                User
+                            </button>
+                            <ul className="dropdown-menu dropdown-menu-end">
+                                <li><a className="dropdown-item" href="#"><i className="fas fa-cog me-2"></i>Settings</a></li>
+                                <li><a className="dropdown-item" href="#"><i className="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    );
+}
+
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <Router>
-                <div className="min-h-screen bg-gray-100">
-                    {/* Navbar */}
-                    <nav className="bg-white shadow-lg">
-                        <div className="max-w-7xl mx-auto px-4">
-                            <div className="flex justify-between h-16">
-                                <div className="flex">
-                                    <div className="flex-shrink-0 flex items-center">
-                                        <h1 className="text-xl font-bold text-gray-800">
-                                            Dashboard App
-                                        </h1>
-                                    </div>
-                                    <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                                        <Link
-                                            to="/dashboards"
-                                            className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                                        >
-                                            Dashboards
-                                        </Link>
-                                        <Link
-                                            to="/audits/plans"
-                                            className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                                        >
-                                            Audit Plans
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </nav>
+                <div className="min-vh-100 bg-light">
+                    <Navigation />
 
                     {/* Main content */}
-                    <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                    <main className="container-fluid py-4">
                         <Routes>
-                            <Route path="/" element={<DashboardsHome />} />
+                            <Route path="/" element={<Welcome />} />
                             <Route
                                 path="/dashboard"
                                 element={<DashboardsHome />}
