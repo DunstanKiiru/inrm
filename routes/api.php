@@ -164,9 +164,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/kris/{kri}/readings', [KriController::class, 'addReading']);
     Route::get('/kris/{kri}/breaches', [KriController::class, 'breaches']);
 
-    Route::get('/kris/breaches/active', [KriBreachController::class, 'active']);
-    Route::post('/kris/breaches/{breach}/ack', [KriBreachController::class, 'acknowledge']);
-    Route::get('/kris/readings/batch', [KriReadingBatchController::class, 'batch']);
+     Route::get('/kris/breaches/active', [KriBreachController::class,'active']);
+    Route::post('/kris/breaches/{breach}/ack', [KriBreachController::class,'acknowledge']);
 
     // Frameworks
   Route::get('/frameworks', [FrameworkController::class,'index']);

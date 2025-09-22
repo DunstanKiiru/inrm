@@ -3,6 +3,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { listDashboardsQuery, Dashboard } from "../lib/dashApi";
+import DashboardBreachesCard from "../components/DashboardBreachesCard";
 
 export default function DashboardsHome() {
     const { data, isLoading, isError } = useQuery({
@@ -36,6 +37,14 @@ export default function DashboardsHome() {
                 <Link to="/dashboards/new" className="btn btn-primary">
                     + Create Dashboard
                 </Link>
+            </div>
+
+            {/* Active Breaches Card */}
+            <div className="mb-6">
+                <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:16}}>
+                    <DashboardBreachesCard />
+                    {/* other cards... */}
+                </div>
             </div>
 
             <div className="mb-6 flex gap-4">

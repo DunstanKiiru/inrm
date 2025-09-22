@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ackBreach, listActiveBreaches } from "../lib/breachesApi";
 import { readingsBatch } from "../lib/kriReadingsBatchApi";
 import { Link } from "react-router-dom";
-import MiniSpark from "../lib/MiniSpark";
+import MiniSpark from "../components/MiniSpark";
 
 export default function DashboardBreachesCard() {
     const [level, setLevel] = useState<string>("");
@@ -26,7 +26,7 @@ export default function DashboardBreachesCard() {
         [breachesQuery.data]
     );
 
-    // Fetch batch readings
+    // Fetch batch readings for sparklines
     const batchQuery = useQuery({
         queryKey: ["kri-batch", kriIds.join(",")],
         queryFn: () => readingsBatch(kriIds),
@@ -41,23 +41,16 @@ export default function DashboardBreachesCard() {
     });
 
     return (
-        <div
-            style={{ border: "1px solid #eee", borderRadius: 12, padding: 12 }}
-        >
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                }}
-            >
-                <h3 style={{ margin: 0 }}>Active KRI Breaches</h3>
-                <label style={{ fontSize: 12 }}>
+        <div className="border rounded p-4 shadow bg-white">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h3 className="mb-0">Active KRI Breaches</h3>
+                <label className="form-label mb-0" style={{ fontSize: '0.875rem' }}>
                     Level:
                     <select
+                        className="form-select form-select-sm ms-2"
                         value={level}
                         onChange={(e) => setLevel(e.target.value)}
-                        style={{ marginLeft: 6 }}
+                        style={{ width: 'auto', display: 'inline-block' }}
                     >
                         <option value="">All</option>
                         <option value="alert">Alert</option>
@@ -67,93 +60,83 @@ export default function DashboardBreachesCard() {
             </div>
 
             {!breachesQuery.data?.length ? (
-                <p style={{ opacity: 0.7 }}>No active breaches.</p>
+                <p className="text-muted mb-0">No active breaches.</p>
             ) : (
-                <table
-                    width="100%"
-                    cellPadding={6}
-                    style={{ borderCollapse: "collapse", marginTop: 6 }}
-                >
-                    <thead>
-                        <tr>
-                            <th>When</th>
-                            <th>Level</th>
-                            <th>KRI</th>
-                            <th>Entity</th>
-                            <th>Reading</th>
-                            <th>Trend</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {breachesQuery.data.map((b) => {
-                            const series =
-                                batchQuery.data && batchQuery.data[b.kri_id]
-                                    ? (batchQuery.data[b.kri_id] as any).map(
-                                          (r: any) => Number(r.value)
-                                      )
-                                    : [];
+                <div className="table-responsive">
+                    <table className="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>When</th>
+                                <th>Level</th>
+                                <th>KRI</th>
+                                <th>Entity</th>
+                                <th>Reading</th>
+                                <th>Trend</th>
+                                <th className="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {breachesQuery.data.map((b) => {
+                                const series =
+                                    batchQuery.data && batchQuery.data[b.kri_id]
+                                        ? (batchQuery.data[b.kri_id] as any).map(
+                                              (r: any) => Number(r.value)
+                                          )
+                                        : [];
 
-                            return (
-                                <tr
-                                    key={b.breach_id}
-                                    style={{ borderTop: "1px solid #eee" }}
-                                >
-                                    <td>
-                                        {new Date(
-                                            b.created_at
-                                        ).toLocaleString()}
-                                    </td>
-                                    <td style={{ fontWeight: 700 }}>
-                                        {b.level.toUpperCase()}
-                                    </td>
-                                    <td>
-                                        <Link to={`/kris/${b.kri_id}`}>
-                                            {b.kri_title}
-                                        </Link>
-                                    </td>
-                                    <td>
-                                        {b.entity_type} #{b.entity_id}
-                                    </td>
-                                    <td>
-                                        {b.reading_value ?? "-"} {b.unit || ""}
-                                    </td>
-                                    <td>
-                                        {series.length ? (
-                                            <MiniSpark
-                                                points={series}
-                                                level={b.level}
-                                                warnThreshold={
-                                                    b.warn_threshold ??
-                                                    undefined
-                                                }
-                                                alertThreshold={
-                                                    b.alert_threshold ??
-                                                    undefined
-                                                }
-                                                target={b.target ?? undefined}
-                                                direction={b.direction as any}
-                                            />
-                                        ) : (
-                                            <span style={{ opacity: 0.6 }}>
-                                                -
+                                return (
+                                    <tr key={b.breach_id}>
+                                        <td className="text-muted" style={{ fontSize: '0.875rem' }}>
+                                            {new Date(
+                                                b.created_at
+                                            ).toLocaleString()}
+                                        </td>
+                                        <td>
+                                            <span className={`badge ${b.level === 'alert' ? 'bg-danger' : 'bg-warning'}`}>
+                                                {b.level.toUpperCase()}
                                             </span>
-                                        )}
-                                    </td>
-                                    <td style={{ textAlign: "right" }}>
-                                        <button
-                                            onClick={() =>
-                                                ackMutation.mutate(b.breach_id)
-                                            }
-                                        >
-                                            Acknowledge
-                                        </button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                                        </td>
+                                        <td>
+                                            <Link
+                                                to={`/kris/${b.kri_id}`}
+                                                className="text-decoration-none"
+                                            >
+                                                {b.kri_title}
+                                            </Link>
+                                        </td>
+                                        <td className="text-muted" style={{ fontSize: '0.875rem' }}>
+                                            {b.entity_type} #{b.entity_id}
+                                        </td>
+                                        <td className="text-muted" style={{ fontSize: '0.875rem' }}>
+                                            {b.reading_value ?? "-"} {b.unit || ""}
+                                        </td>
+                                        <td>
+                                            {series.length ? (
+                                                <MiniSpark
+                                                    points={series}
+                                                    level={b.level}
+                                                    direction={b.direction as any}
+                                                />
+                                            ) : (
+                                                <span className="text-muted">-</span>
+                                            )}
+                                        </td>
+                                        <td className="text-end">
+                                            <button
+                                                className="btn btn-sm btn-outline-primary"
+                                                onClick={() =>
+                                                    ackMutation.mutate(b.breach_id)
+                                                }
+                                            >
+                                                Acknowledge
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             )}
         </div>
     );

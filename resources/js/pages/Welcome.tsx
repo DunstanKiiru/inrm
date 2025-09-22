@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import { isAuthenticated, getCurrentUser } from "../lib/authApi";
 
 export default function Welcome() {
-    const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+    const [authStatus, setAuthStatus] = useState<
+        "loading" | "authenticated" | "unauthenticated"
+    >("loading");
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -11,22 +13,22 @@ export default function Welcome() {
                 try {
                     const user = await getCurrentUser();
                     if (user) {
-                        setAuthStatus('authenticated');
+                        setAuthStatus("authenticated");
                     } else {
-                        setAuthStatus('unauthenticated');
+                        setAuthStatus("unauthenticated");
                     }
                 } catch (error) {
-                    setAuthStatus('unauthenticated');
+                    setAuthStatus("unauthenticated");
                 }
             } else {
-                setAuthStatus('unauthenticated');
+                setAuthStatus("unauthenticated");
             }
         };
 
         checkAuth();
     }, []);
 
-    if (authStatus === 'loading') {
+    if (authStatus === "loading") {
         return (
             <div className="min-vh-100 d-flex align-items-center justify-content-center">
                 <div className="spinner-border text-primary" role="status">
@@ -36,11 +38,15 @@ export default function Welcome() {
         );
     }
 
-    if (authStatus === 'unauthenticated') {
+    if (authStatus === "unauthenticated") {
         return (
-            <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{
-                background: 'linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)'
-            }}>
+            <div
+                className="min-vh-100 d-flex align-items-center justify-content-center"
+                style={{
+                    background:
+                        "linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)",
+                }}
+            >
                 <div className="container">
                     <div className="row justify-content-center">
                         <div className="col-lg-8 col-xl-6">
@@ -52,12 +58,14 @@ export default function Welcome() {
                                             Welcome to INRM
                                         </h1>
                                         <p className="h5 text-muted mb-4">
-                                            Integrated Non-Financial Risk Management System
+                                            Integrated Non-Financial Risk
+                                            Management System
                                         </p>
                                     </div>
 
                                     <p className="lead text-muted mb-5">
-                                        Please log in to access your risk management dashboard and tools.
+                                        Please log in to access your risk
+                                        management dashboard and tools.
                                     </p>
 
                                     <div className="d-grid gap-3">
@@ -74,22 +82,34 @@ export default function Welcome() {
                                         <div className="col-md-4 mb-3">
                                             <div className="text-center">
                                                 <i className="fas fa-chart-pie text-info fa-2x mb-2"></i>
-                                                <h6 className="fw-bold">Analytics</h6>
-                                                <small className="text-muted">Real-time insights</small>
+                                                <h6 className="fw-bold">
+                                                    Analytics
+                                                </h6>
+                                                <small className="text-muted">
+                                                    Real-time insights
+                                                </small>
                                             </div>
                                         </div>
                                         <div className="col-md-4 mb-3">
                                             <div className="text-center">
                                                 <i className="fas fa-shield-check text-success fa-2x mb-2"></i>
-                                                <h6 className="fw-bold">Compliance</h6>
-                                                <small className="text-muted">Risk management</small>
+                                                <h6 className="fw-bold">
+                                                    Compliance
+                                                </h6>
+                                                <small className="text-muted">
+                                                    Risk management
+                                                </small>
                                             </div>
                                         </div>
                                         <div className="col-md-4 mb-3">
                                             <div className="text-center">
                                                 <i className="fas fa-clipboard-list text-warning fa-2x mb-2"></i>
-                                                <h6 className="fw-bold">Auditing</h6>
-                                                <small className="text-muted">Comprehensive tracking</small>
+                                                <h6 className="fw-bold">
+                                                    Auditing
+                                                </h6>
+                                                <small className="text-muted">
+                                                    Comprehensive tracking
+                                                </small>
                                             </div>
                                         </div>
                                     </div>
@@ -104,9 +124,12 @@ export default function Welcome() {
 
     // Authenticated user view
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{
-            background: 'linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)'
-        }}>
+        <div
+            className="min-vh-100 d-flex align-items-center justify-content-center"
+            style={{
+                background: "linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)",
+            }}
+        >
             <div className="container">
                 <div className="row justify-content-center">
                     <div className="col-lg-8 col-xl-6">
@@ -118,13 +141,15 @@ export default function Welcome() {
                                         Welcome to INRM
                                     </h1>
                                     <p className="h5 text-muted mb-4">
-                                        Integrated Non-Financial Risk Management System
+                                        Integrated Non-Financial Risk Management
+                                        System
                                     </p>
                                 </div>
 
                                 <p className="lead text-muted mb-5">
-                                    Manage your organization's risk, compliance, and audit activities
-                                    in one comprehensive platform.
+                                    Manage your organization's risk, compliance,
+                                    and audit activities in one comprehensive
+                                    platform.
                                 </p>
 
                                 <div className="d-grid gap-3 d-sm-flex justify-content-sm-center">
@@ -148,22 +173,34 @@ export default function Welcome() {
                                     <div className="col-md-4 mb-3">
                                         <div className="text-center">
                                             <i className="fas fa-chart-pie text-info fa-2x mb-2"></i>
-                                            <h6 className="fw-bold">Analytics</h6>
-                                            <small className="text-muted">Real-time insights</small>
+                                            <h6 className="fw-bold">
+                                                Analytics
+                                            </h6>
+                                            <small className="text-muted">
+                                                Real-time insights
+                                            </small>
                                         </div>
                                     </div>
                                     <div className="col-md-4 mb-3">
                                         <div className="text-center">
                                             <i className="fas fa-shield-check text-success fa-2x mb-2"></i>
-                                            <h6 className="fw-bold">Compliance</h6>
-                                            <small className="text-muted">Risk management</small>
+                                            <h6 className="fw-bold">
+                                                Compliance
+                                            </h6>
+                                            <small className="text-muted">
+                                                Risk management
+                                            </small>
                                         </div>
                                     </div>
                                     <div className="col-md-4 mb-3">
                                         <div className="text-center">
                                             <i className="fas fa-clipboard-list text-warning fa-2x mb-2"></i>
-                                            <h6 className="fw-bold">Auditing</h6>
-                                            <small className="text-muted">Comprehensive tracking</small>
+                                            <h6 className="fw-bold">
+                                                Auditing
+                                            </h6>
+                                            <small className="text-muted">
+                                                Comprehensive tracking
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
