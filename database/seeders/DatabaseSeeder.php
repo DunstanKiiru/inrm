@@ -25,16 +25,15 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        
 
 
+     $this->call(\Database\Seeders\DashboardsDemoSeed::class);
      $this->call(\Database\Seeders\AssessmentKRISeed::class);
         $this->call(\Database\Seeders\AuditDemoSeed::class);
         $this->call(\Database\Seeders\BcmSeeder::class);
         $this->call(\Database\Seeders\ComplianceSeed::class);
         $this->call(\Database\Seeders\ControlLibrarySeed::class);
         $this->call(\Database\Seeders\ControlTestingDemoSeed::class);
-        $this->call(\Database\Seeders\DashboardsDemoSeed::class);
         $this->call(\Database\Seeders\DemoRisksSeed::class);
         $this->call(\Database\Seeders\RiskAppetiteSeed::class);
         $this->call(\Database\Seeders\RiskTaxonomySeed::class);

@@ -1,9 +1,10 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { listDashboards } from "../lib/dashApi";
 
 // -----------------------------------------------------------------------------
-// Mock API – replace with your real endpoint later
+// Types
 // -----------------------------------------------------------------------------
 interface Dashboard {
     id: number;
@@ -14,48 +15,13 @@ interface Dashboard {
     lastUpdated?: string;
 }
 
-async function listDashboards(): Promise<Dashboard[]> {
-    return [
-        {
-            id: 1,
-            title: "Finance Dashboard",
-            role: "Admin",
-            description: "Comprehensive financial metrics, KPIs, and performance indicators",
-            metrics: 24,
-            lastUpdated: "2 hours ago"
-        },
-        {
-            id: 2,
-            title: "Operations Dashboard",
-            role: "Viewer",
-            description: "Monitor operational efficiency, productivity, and process metrics",
-            metrics: 18,
-            lastUpdated: "1 day ago"
-        },
-        {
-            id: 3,
-            title: "Marketing Dashboard",
-            description: "Track campaign performance, customer acquisition, and ROI metrics",
-            metrics: 15,
-            lastUpdated: "3 hours ago"
-        },
-        {
-            id: 4,
-            title: "Risk Management",
-            description: "Monitor risk indicators, compliance status, and mitigation progress",
-            metrics: 12,
-            lastUpdated: "5 hours ago"
-        },
-    ];
-}
-
 // -----------------------------------------------------------------------------
 // Component
 // -----------------------------------------------------------------------------
 export default function DashboardsHome() {
     const { data, isLoading, isError } = useQuery({
         queryKey: ["dashboards"],
-        queryFn: listDashboards,
+        queryFn: () => listDashboards(),
     });
 
     if (isLoading)
@@ -131,7 +97,7 @@ export default function DashboardsHome() {
                     <div className="card text-center border-0 shadow-sm bg-primary text-white">
                         <div className="card-body py-3">
                             <i className="fas fa-chart-bar fa-2x mb-2 opacity-75"></i>
-                            <h3 className="mb-1">{data?.length || 0}</h3>
+                            <h3 className="mb-1">{Array.isArray(data) ? data.length : 0}</h3>
                             <p className="mb-0 small opacity-75">Total Dashboards</p>
                         </div>
                     </div>
@@ -140,7 +106,7 @@ export default function DashboardsHome() {
                     <div className="card text-center border-0 shadow-sm bg-success text-white">
                         <div className="card-body py-3">
                             <i className="fas fa-chart-pie fa-2x mb-2 opacity-75"></i>
-                            <h3 className="mb-1">{data?.reduce((acc, d) => acc + (d.metrics || 0), 0) || 0}</h3>
+                            <h3 className="mb-1">{Array.isArray(data) ? data.reduce((acc: number, d: Dashboard) => acc + (d.metrics || 0), 0) : 0}</h3>
                             <p className="mb-0 small opacity-75">Active Metrics</p>
                         </div>
                     </div>
@@ -169,7 +135,7 @@ export default function DashboardsHome() {
                 <div className="row">
                     <div className="col-12">
                         <div className="row g-4">
-                            {data.map((d) => (
+                            {data.map((d: Dashboard) => (
                                 <div key={d.id} className="col-lg-6 col-xl-4">
                                     <div className="card h-100 shadow-lg border-0 hover-shadow">
                                         <div className="card-body d-flex flex-column p-4">
