@@ -19,8 +19,31 @@ use App\Http\Controllers\API\AssessmentController;
 use App\Http\Controllers\API\KriController;
 use App\Http\Controllers\API\KriBreachController;
 use App\Http\Controllers\API\KriReadingBatchController;
+use App\Http\Controllers\API\DashboardController;
+use App\Http\Controllers\API\KpiController;
+use App\Http\Controllers\API\ExportController;
+use App\Http\Controllers\API\DigestController;
 
 Route::middleware('auth:sanctum')->group(function(){
+      // Dashboards
+  Route::get('/dashboards', [DashboardController::class,'list']);
+  Route::get('/dashboards/{dashboard}', [DashboardController::class,'show']);
+
+  // KPIs
+  Route::get('/kpis', [KpiController::class,'list']);
+  Route::post('/kpis', [KpiController::class,'create']);
+  Route::get('/kpis/{kpi}/series', [KpiController::class,'timeseries']);
+  Route::post('/kpis/{kpi}/readings', [KpiController::class,'addReading']);
+
+  // Exports
+  Route::get('/export/board-pack/pdf', [ExportController::class,'boardPackPdf']);
+  Route::get('/export/dashboard/csv', [ExportController::class,'dashboardCsv']);
+  Route::get('/export/dashboard/xlsx', [ExportController::class,'dashboardXlsx']);
+
+  // Digests
+  Route::post('/digest/send-now', [DigestController::class,'sendNow']);
+
+
   // Taxonomy CRUD
   Route::apiResource('risk-categories', RiskCategoryController::class)->only(['index','store','update','destroy']);
   Route::apiResource('risk-causes', RiskCauseController::class)->only(['index','store','update','destroy']);
