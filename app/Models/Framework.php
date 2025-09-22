@@ -5,11 +5,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Framework extends Model {
   use HasFactory;
-  protected $fillable = [
-    'key', 'title', 'description', 'version'
-  ];
-
-  public function requirements() {
-    return $this->hasMany(Requirement::class);
-  }
+  protected $fillable = ['key','title','description','version'];
+  public function requirements(){ return $this->hasMany(Requirement::class); }
 }
