@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import DashboardsHome from './pages/DashboardsHome';
 import DashboardView from './pages/DashboardView';
+import AuditPlansList from './pages/AuditPlansList';
+import AuditPlanDetail from './pages/AuditPlanDetail';
+import NewAuditPlan from './pages/NewAuditPlan';
 
 const queryClient = new QueryClient();
 
@@ -25,6 +28,12 @@ function App() {
                     >
                       Dashboards
                     </Link>
+                    <Link
+                      to="/audits/plans"
+                      className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                    >
+                      Audit Plans
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -35,6 +44,9 @@ function App() {
             <Routes>
               <Route path="/dashboards" element={<DashboardsHome />} />
               <Route path="/dashboards/:id" element={<DashboardView />} />
+              <Route path="/audits/plans" element={<AuditPlansList />} />
+              <Route path="/audits/plans/new" element={<NewAuditPlan />} />
+              <Route path="/audits/plans/:id" element={<AuditPlanDetail />} />
             </Routes>
           </main>
         </div>

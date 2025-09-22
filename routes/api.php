@@ -23,6 +23,8 @@ use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\KpiController;
 use App\Http\Controllers\API\ExportController;
 use App\Http\Controllers\API\DigestController;
+use App\Http\Controllers\API\AuditPlanController;
+
 
 Route::middleware('auth:sanctum')->group(function(){
       // Dashboards
@@ -43,6 +45,26 @@ Route::middleware('auth:sanctum')->group(function(){
   // Digests
   Route::post('/digest/send-now', [DigestController::class,'sendNow']);
 
+ // Plans
+  Route::get('/audits/plans', [AuditPlanController::class,'index']);
+  Route::post('/audits/plans', [AuditPlanController::class,'store']);
+  Route::get('/audits/plans/{plan}', [AuditPlanController::class,'show']);
+  Route::put('/audits/plans/{plan}', [AuditPlanController::class,'update']);
+
+  // Procedures
+  Route::post('/audits/plans/{plan}/procedures', [AuditPlanController::class,'addProcedure']);
+  Route::put('/audits/plans/{plan}/procedures/{procedure}', [AuditPlanController::class,'updateProcedure']);
+
+  // Samples
+  Route::post('/audits/plans/{plan}/procedures/{procedure}/samples', [AuditPlanController::class,'addSample']);
+  Route::post('/audits/plans/{plan}/procedures/{procedure}/samples/bulk', [AuditPlanController::class,'bulkSamples']);
+
+  // Findings
+  Route::post('/audits/plans/{plan}/findings', [AuditPlanController::class,'addFinding']);
+  Route::put('/audits/plans/{plan}/findings/{finding}', [AuditPlanController::class,'updateFinding']);
+
+  // Follow-ups
+  Route::post('/audits/plans/{plan}/findings/{finding}/followups', [AuditPlanController::class,'addFollowUp']);
 
   // Taxonomy CRUD
   Route::apiResource('risk-categories', RiskCategoryController::class)->only(['index','store','update','destroy']);
