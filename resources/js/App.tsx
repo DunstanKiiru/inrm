@@ -82,11 +82,11 @@ function Navigation() {
         try {
             await logout();
             setIsAuth(false);
-            window.location.href = '/login';
+            window.location.href = '/';
         } catch (error) {
             console.error('Logout failed:', error);
-            // Even if logout fails, redirect to login
-            window.location.href = '/login';
+            // Even if logout fails, redirect to home page
+            window.location.href = '/';
         }
     };
 
