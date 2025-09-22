@@ -1,12 +1,28 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\SSOController;
 use App\Http\Controllers\API\ReportController;
+use App\Http\Controllers\Auth\LoginController;
 
-Route::get('/reports/boardpack/preview',[ReportController::class,'boardpackPreview'])->name('boardpack.preview');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Routes for browser + SPA.
+| Keep POST /login before the catch-all so it isn’t shadowed.
+|
+*/
 
+// ===== Authentication =====
+Route::post('/login', [LoginController::class, 'login'])->name('login');
+
+// ===== Reports =====
+Route::get('/reports/boardpack/preview', [ReportController::class, 'boardpackPreview'])
+    ->name('boardpack.preview');
+
+// ===== SPA Catch-all =====
+// Handles everything except /api/*
 Route::get('/{any}', function () {
     return view('app');
-})->where('any', '.*');
-
-
+})->where('any', '^(?!api).*$');

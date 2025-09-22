@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '',
+  baseURL: 'http://127.0.0.1:8000',
   headers: {
     'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest',
@@ -14,7 +14,27 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers['X-CSRF-TOKEN'] = token;
   }
+
+  // Add authorization header if user is authenticated
+  const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+  if (authToken) {
+    config.headers['Authorization'] = `Bearer ${authToken}`;
+  }
+
   return config;
 });
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized access
+      console.error('Unauthorized access - redirecting to login');
+      // You might want to redirect to login page here
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;
