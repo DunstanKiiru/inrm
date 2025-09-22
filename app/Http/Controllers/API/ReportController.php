@@ -1,0 +1,3 @@
+<?php
+namespace App\Http\Controllers\API; use App\Http\Controllers\Controller; use Illuminate\Support\Facades\DB;
+class ReportController extends Controller { public function boardpackPreview(){ $kpis=[ 'risks_total'=> (int)DB::table('risks')->count(), 'risks_active'=>(int)DB::table('risks')->where('status','active')->count(), 'issues_open'=>(int)DB::table('issues')->where('status','open')->count(), 'policies_published'=>(int)DB::table('policies')->where('status','published')->count(), ]; return view('reports.boardpack',['kpis'=>$kpis]); } }
