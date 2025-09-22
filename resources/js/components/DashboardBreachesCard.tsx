@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ackBreach, listActiveBreaches } from "../lib/breachesApi";
 import { readingsBatch } from "../lib/kriReadingsBatchApi";
 import { Link } from "react-router-dom";
-import MiniSpark from "./MiniSpark";
+import MiniSpark from "../components/MiniSpark";
 
 export default function DashboardBreachesCard() {
     const [level, setLevel] = useState<string>("");
@@ -153,6 +153,17 @@ export default function DashboardBreachesCard() {
                                                 <MiniSpark
                                                     points={series}
                                                     level={b.level}
+                                                    warnThreshold={
+                                                        b.warn_threshold ??
+                                                        undefined
+                                                    }
+                                                    alertThreshold={
+                                                        b.alert_threshold ??
+                                                        undefined
+                                                    }
+                                                    target={
+                                                        b.target ?? undefined
+                                                    }
                                                     direction={
                                                         b.direction as any
                                                     }
