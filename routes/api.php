@@ -1,12 +1,13 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\RiskCategoryController;
-use App\Http\Controllers\API\RiskCauseController;
-use App\Http\Controllers\API\RiskConsequenceController;
-use App\Http\Controllers\API\OrgUnitController;
-use App\Http\Controllers\API\RiskTaxonomyController;
-use App\Http\Controllers\API\RiskRollupController;
-use App\Http\Controllers\API\RiskAppetiteController;
+// Temporarily disabled due to missing controllers
+// use App\Http\Controllers\API\RiskCategoryController;
+// use App\Http\Controllers\API\RiskCauseController;
+// use App\Http\Controllers\API\RiskConsequenceController;
+// use App\Http\Controllers\API\OrgUnitController;
+// use App\Http\Controllers\API\RiskTaxonomyController;
+// use App\Http\Controllers\API\RiskRollupController;
+// use App\Http\Controllers\API\RiskAppetiteController;
 use App\Http\Controllers\API\ControlController;
 use App\Http\Controllers\API\ControlMappingController;
 use App\Http\Controllers\API\ControlTestPlanController;
@@ -66,27 +67,27 @@ Route::middleware('auth:sanctum')->group(function(){
   // Follow-ups
   Route::post('/audits/plans/{plan}/findings/{finding}/followups', [AuditPlanController::class,'addFollowUp']);
 
-  // Taxonomy CRUD
-  Route::apiResource('risk-categories', RiskCategoryController::class)->only(['index','store','update','destroy']);
-  Route::apiResource('risk-causes', RiskCauseController::class)->only(['index','store','update','destroy']);
-  Route::apiResource('risk-consequences', RiskConsequenceController::class)->only(['index','store','update','destroy']);
-  Route::apiResource('org-units', OrgUnitController::class)->only(['index','store','update','destroy']);
+  // Taxonomy CRUD - Temporarily disabled due to missing controllers
+  // Route::apiResource('risk-categories', RiskCategoryController::class)->only(['index','store','update','destroy']);
+  // Route::apiResource('risk-causes', RiskCauseController::class)->only(['index','store','update','destroy']);
+  // Route::apiResource('risk-consequences', RiskConsequenceController::class)->only(['index','store','update','destroy']);
+  // Route::apiResource('org-units', OrgUnitController::class)->only(['index','store','update','destroy']);
 
-  // Assign taxonomy to a risk
-  Route::get('/risks/{risk}/taxonomy',[RiskTaxonomyController::class,'get']);
-  Route::put('/risks/{risk}/taxonomy',[RiskTaxonomyController::class,'set']);
+  // Assign taxonomy to a risk - Temporarily disabled due to missing controllers
+  // Route::get('/risks/{risk}/taxonomy',[RiskTaxonomyController::class,'get']);
+  // Route::put('/risks/{risk}/taxonomy',[RiskTaxonomyController::class,'set']);
 
-  // Rollups
-  Route::get('/risks/rollups/category',[RiskRollupController::class,'byCategory']);
-  Route::get('/risks/rollups/org-unit',[RiskRollupController::class,'byOrgUnit']);
-  Route::get('/risks/rollups/owner',[RiskRollupController::class,'byOwner']);
+  // Rollups - Temporarily disabled due to missing controllers
+  // Route::get('/risks/rollups/category',[RiskRollupController::class,'byCategory']);
+  // Route::get('/risks/rollups/org-unit',[RiskRollupController::class,'byOrgUnit']);
+  // Route::get('/risks/rollups/owner',[RiskRollupController::class,'byOwner']);
 
-  // Appetite & thresholds
-  Route::get('/risk-appetite/profiles',[RiskAppetiteController::class,'profiles']);
-  Route::post('/risk-appetite/profiles',[RiskAppetiteController::class,'storeProfile']);
-  Route::get('/risk-appetite/profiles/{profile}/thresholds',[RiskAppetiteController::class,'thresholds']);
-  Route::post('/risk-appetite/profiles/{profile}/thresholds',[RiskAppetiteController::class,'storeThreshold']);
-  Route::get('/risks/{risk}/breaches',[RiskAppetiteController::class,'breaches']);
+  // Appetite & thresholds - Temporarily disabled due to missing controllers
+  // Route::get('/risk-appetite/profiles',[RiskAppetiteController::class,'profiles']);
+  // Route::post('/risk-appetite/profiles',[RiskAppetiteController::class,'storeProfile']);
+  // Route::get('/risk-appetite/profiles/{profile}/thresholds',[RiskAppetiteController::class,'thresholds']);
+  // Route::post('/risk-appetite/profiles/{profile}/thresholds',[RiskAppetiteController::class,'storeThreshold']);
+  // Route::get('/risks/{risk}/breaches',[RiskAppetiteController::class,'breaches']);
 
   Route::get('/controls',[ControlController::class,'index']);
   Route::post('/controls',[ControlController::class,'store']);
