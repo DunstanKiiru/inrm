@@ -17,9 +17,8 @@ class KriBreachController extends Controller
         if($level){ $levelFilter = ' AND b.level = ? '; $params[] = $level; }
 
         $sql = "
-        SELECT b.id as breach_id, b.level, b.message, b.created_at,
-               k.id as kri_id, k.title as kri_title, k.entity_type, k.entity_id,
-               k.unit, k.direction, k.target, k.warn_threshold, k.alert_threshold,
+        SELECT b.id as breach_id, b.level, b.message, b.created_at, k.id as kri_id, k.title as kri_title,
+               k.entity_type, k.entity_id, k.unit, k.direction,
                r.value as reading_value, r.collected_at as reading_at
         FROM kri_breaches b
         JOIN kris k ON k.id = b.kri_id
@@ -32,13 +31,18 @@ class KriBreachController extends Controller
 
         $params[] = $limit;
         $rows = DB::select($sql, $params);
+
+        // Attach last 6 readings for each KRI
+        foreach($rows as &$row){
+            $trend = DB::table('kri_readings')->where('kri_id',$row->kri_id)
+              ->orderBy('collected_at','desc')->limit(6)->pluck('value')->toArray();
+            $row->trend = array_reverse($trend);
+        }
         return $rows;
     }
 
     public function acknowledge(Request $r, int $breach){
-        DB::table('kri_breaches')->where('id',$breach)->update([
-            'acknowledged_at' => now()
-        ]);
+        DB::table('kri_breaches')->where('id',$breach)->update(['acknowledged_at'=>now()]);
         return response()->json(['ok'=>true]);
     }
 }
