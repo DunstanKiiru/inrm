@@ -28,6 +28,7 @@ class KriBreachController extends Controller
             SELECT b.id as breach_id, b.level, b.message, b.created_at,
                    k.id as kri_id, k.title as kri_title,
                    k.entity_type, k.entity_id, k.unit, k.direction,
+                   k.target, k.warn_threshold, k.alert_threshold,
                    r.value as reading_value, r.collected_at as reading_at
             FROM kri_breaches b
             JOIN kris k ON k.id = b.kri_id

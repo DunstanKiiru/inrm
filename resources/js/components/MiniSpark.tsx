@@ -25,7 +25,7 @@ export default function MiniSpark({
     direction?: "higher_is_better" | "lower_is_better";
     showLegend?: boolean;
 }) {
-    // Convert points to values if provided
+    // Convert points to values array
     const vals = useMemo(() => {
         if (points && points.length) return points.map((p) => p.value);
         if (values && values.length) return values;
@@ -34,6 +34,7 @@ export default function MiniSpark({
 
     if (!vals.length) return <svg width={width} height={height}></svg>;
 
+    // Calculate min/max including thresholds and target
     const thresholds = [warnThreshold, alertThreshold, target].filter(
         (v): v is number => typeof v === "number"
     );
@@ -52,8 +53,8 @@ export default function MiniSpark({
     const n = vals.length;
     const xFor = (i: number) => (n > 1 ? (i * width) / (n - 1) : width / 2);
     const yFor = (v: number) => height - ((v - min) / span) * height;
-
     const pts = vals.map((v, i) => `${xFor(i)},${yFor(v)}`).join(" ");
+
     const stroke =
         level === "alert"
             ? "#d92d20"
@@ -61,7 +62,7 @@ export default function MiniSpark({
             ? "#f79009"
             : "currentColor";
 
-    // Tooltip for points with timestamps
+    // Tooltip
     const [tip, setTip] = useState<{ x: number; y: number; visible: boolean }>({
         x: 0,
         y: 0,
@@ -93,13 +94,17 @@ export default function MiniSpark({
     // Guidebands
     const hasWarn = typeof warnThreshold === "number";
     const hasAlert = typeof alertThreshold === "number";
+    const hasTarget = typeof target === "number";
+
     const warnY = hasWarn ? yFor(warnThreshold as number) : null;
     const alertY = hasAlert ? yFor(alertThreshold as number) : null;
+    const targetY = hasTarget ? yFor(target as number) : null;
 
     let warnTop = 0,
         warnHeight = 0,
         alertTop = 0,
         alertHeight = 0;
+
     if ((hasWarn || hasAlert) && direction) {
         if (hasWarn && hasAlert) {
             if (direction === "lower_is_better") {
@@ -131,9 +136,6 @@ export default function MiniSpark({
             }
         }
     }
-
-    const hasTarget = typeof target === "number";
-    const targetY = hasTarget ? yFor(target as number) : null;
 
     return (
         <div style={{ position: "relative", width, height }}>
@@ -170,18 +172,18 @@ export default function MiniSpark({
                         y2={targetY as number}
                         stroke="#6b7280"
                         strokeDasharray="4 3"
-                        strokeWidth="1"
+                        strokeWidth={1}
                     />
                 )}
                 <polyline
                     points={pts}
                     fill="none"
                     stroke={stroke}
-                    strokeWidth="2"
+                    strokeWidth={2}
                 />
             </svg>
 
-            {showLegend && (hasWarn || hasAlert) && (
+            {showLegend && (hasWarn || hasAlert || hasTarget) && (
                 <div
                     style={{
                         position: "absolute",

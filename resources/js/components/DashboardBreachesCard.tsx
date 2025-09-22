@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ackBreach, listActiveBreaches } from "../lib/breachesApi";
 import { readingsBatch } from "../lib/kriReadingsBatchApi";
 import { Link } from "react-router-dom";
-import MiniSpark from "../components/MiniSpark";
+import MiniSpark from "./MiniSpark";
 
 export default function DashboardBreachesCard() {
     const [level, setLevel] = useState<string>("");
@@ -20,7 +20,7 @@ export default function DashboardBreachesCard() {
             }),
     });
 
-    // Extract KRI IDs
+    // Extract KRI IDs for batch readings
     const kriIds = useMemo(
         () => (breachesQuery.data || []).map((b) => b.kri_id),
         [breachesQuery.data]
@@ -41,16 +41,29 @@ export default function DashboardBreachesCard() {
     });
 
     return (
-        <div className="border rounded p-4 shadow bg-white">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3 className="mb-0">Active KRI Breaches</h3>
-                <label className="form-label mb-0" style={{ fontSize: '0.875rem' }}>
+        <div
+            style={{
+                border: "1px solid #eee",
+                borderRadius: 12,
+                padding: 12,
+                background: "white",
+            }}
+        >
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 8,
+                }}
+            >
+                <h3 style={{ margin: 0 }}>Active KRI Breaches</h3>
+                <label style={{ fontSize: 12 }}>
                     Level:
                     <select
-                        className="form-select form-select-sm ms-2"
                         value={level}
                         onChange={(e) => setLevel(e.target.value)}
-                        style={{ width: 'auto', display: 'inline-block' }}
+                        style={{ marginLeft: 6 }}
                     >
                         <option value="">All</option>
                         <option value="alert">Alert</option>
@@ -60,10 +73,16 @@ export default function DashboardBreachesCard() {
             </div>
 
             {!breachesQuery.data?.length ? (
-                <p className="text-muted mb-0">No active breaches.</p>
+                <p style={{ opacity: 0.7 }}>No active breaches.</p>
             ) : (
-                <div className="table-responsive">
-                    <table className="table table-sm mb-0">
+                <div style={{ overflowX: "auto" }}>
+                    <table
+                        style={{
+                            width: "100%",
+                            borderCollapse: "collapse",
+                            marginTop: 6,
+                        }}
+                    >
                         <thead>
                             <tr>
                                 <th>When</th>
@@ -72,60 +91,88 @@ export default function DashboardBreachesCard() {
                                 <th>Entity</th>
                                 <th>Reading</th>
                                 <th>Trend</th>
-                                <th className="text-end">Actions</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             {breachesQuery.data.map((b) => {
                                 const series =
                                     batchQuery.data && batchQuery.data[b.kri_id]
-                                        ? (batchQuery.data[b.kri_id] as any).map(
-                                              (r: any) => Number(r.value)
-                                          )
+                                        ? (
+                                              batchQuery.data[b.kri_id] as any
+                                          ).map((r: any) => Number(r.value))
                                         : [];
 
                                 return (
-                                    <tr key={b.breach_id}>
-                                        <td className="text-muted" style={{ fontSize: '0.875rem' }}>
+                                    <tr
+                                        key={b.breach_id}
+                                        style={{ borderTop: "1px solid #eee" }}
+                                    >
+                                        <td
+                                            style={{
+                                                fontSize: 12,
+                                                color: "#555",
+                                            }}
+                                        >
                                             {new Date(
                                                 b.created_at
                                             ).toLocaleString()}
                                         </td>
-                                        <td>
-                                            <span className={`badge ${b.level === 'alert' ? 'bg-danger' : 'bg-warning'}`}>
-                                                {b.level.toUpperCase()}
-                                            </span>
+                                        <td style={{ fontWeight: 700 }}>
+                                            {b.level.toUpperCase()}
                                         </td>
                                         <td>
                                             <Link
                                                 to={`/kris/${b.kri_id}`}
-                                                className="text-decoration-none"
+                                                style={{
+                                                    textDecoration: "none",
+                                                }}
                                             >
                                                 {b.kri_title}
                                             </Link>
                                         </td>
-                                        <td className="text-muted" style={{ fontSize: '0.875rem' }}>
+                                        <td
+                                            style={{
+                                                fontSize: 12,
+                                                color: "#555",
+                                            }}
+                                        >
                                             {b.entity_type} #{b.entity_id}
                                         </td>
-                                        <td className="text-muted" style={{ fontSize: '0.875rem' }}>
-                                            {b.reading_value ?? "-"} {b.unit || ""}
+                                        <td
+                                            style={{
+                                                fontSize: 12,
+                                                color: "#555",
+                                            }}
+                                        >
+                                            {b.reading_value ?? "-"}{" "}
+                                            {b.unit || ""}
                                         </td>
                                         <td>
                                             {series.length ? (
                                                 <MiniSpark
                                                     points={series}
                                                     level={b.level}
-                                                    direction={b.direction as any}
+                                                    direction={
+                                                        b.direction as any
+                                                    }
                                                 />
                                             ) : (
-                                                <span className="text-muted">-</span>
+                                                <span style={{ opacity: 0.6 }}>
+                                                    -
+                                                </span>
                                             )}
                                         </td>
-                                        <td className="text-end">
+                                        <td style={{ textAlign: "right" }}>
                                             <button
-                                                className="btn btn-sm btn-outline-primary"
+                                                style={{
+                                                    padding: "2px 6px",
+                                                    fontSize: 12,
+                                                }}
                                                 onClick={() =>
-                                                    ackMutation.mutate(b.breach_id)
+                                                    ackMutation.mutate(
+                                                        b.breach_id
+                                                    )
                                                 }
                                             >
                                                 Acknowledge
