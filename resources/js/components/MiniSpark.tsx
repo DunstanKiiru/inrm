@@ -25,7 +25,6 @@ export default function MiniSpark({
     direction?: "higher_is_better" | "lower_is_better";
     showLegend?: boolean;
 }) {
-    // Convert points to values array
     const vals = useMemo(() => {
         if (points && points.length) return points.map((p) => p.value);
         if (values && values.length) return values;
@@ -34,7 +33,7 @@ export default function MiniSpark({
 
     if (!vals.length) return <svg width={width} height={height}></svg>;
 
-    // Calculate min/max including thresholds and target
+    // Compute min/max including thresholds and target
     const thresholds = [warnThreshold, alertThreshold, target].filter(
         (v): v is number => typeof v === "number"
     );
@@ -69,6 +68,7 @@ export default function MiniSpark({
         visible: false,
     });
     const svgRef = useRef<SVGSVGElement>(null);
+
     const onMove = (e: React.MouseEvent<SVGSVGElement>) => {
         const rect = svgRef.current?.getBoundingClientRect();
         if (rect)
