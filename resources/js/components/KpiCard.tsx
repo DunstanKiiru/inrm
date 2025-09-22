@@ -10,15 +10,39 @@ export default function KpiCard({ title, latest, series, unit, target, direction
   }, [value, target, direction])
 
   return (
-    <div style={{border:'1px solid #eee', borderRadius:12, padding:12, display:'grid', gap:6}}>
-      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-        <div style={{fontWeight:600}}>{title}</div>
-        {target!=null && <div style={{fontSize:12, opacity:.7}}>Target: {target}{unit||''}</div>}
-      </div>
-      <div style={{display:'flex', gap:12, alignItems:'center'}}>
-        <div style={{fontSize:28, fontWeight:700}}>{value}{unit||''}</div>
-        {status && <span style={{fontSize:12, padding:'2px 8px', borderRadius:999, background: status==='good' ? '#dcfce7' : '#fee2e2' }}>{status==='good'?'On track':'Attention'}</span>}
-        <svg width="120" height="32">{spark}</svg>
+    <div className="card h-100 hover-shadow">
+      <div className="card-body d-flex flex-column">
+        <div className="d-flex justify-content-between align-items-start mb-3">
+          <h6 className="card-title mb-0 fw-bold text-gray-800">{title}</h6>
+          {target!=null && (
+            <span className="badge bg-light text-muted border">
+              <i className="fas fa-bullseye me-1"></i>
+              Target: {target}{unit||''}
+            </span>
+          )}
+        </div>
+
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="d-flex align-items-baseline">
+            <span className="fs-2 fw-bold text-primary me-2">{value}</span>
+            {unit && <small className="text-muted">{unit}</small>}
+          </div>
+
+          {status && (
+            <span className={`badge ${status==='good' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}>
+              <i className={`fas ${status==='good' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-1`}></i>
+              {status==='good' ? 'On Track' : 'Attention'}
+            </span>
+          )}
+        </div>
+
+        {spark && (
+          <div className="mt-auto">
+            <svg width="100%" height="40" className="sparkline">
+              {spark}
+            </svg>
+          </div>
+        )}
       </div>
     </div>
   )
