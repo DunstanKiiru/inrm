@@ -18,6 +18,10 @@ use App\Http\Controllers\API\KpiController;
 use App\Http\Controllers\API\ExportController;
 use App\Http\Controllers\API\DigestController;
 use App\Http\Controllers\API\AuditPlanController;
+use App\Http\Controllers\API\FrameworkController;
+use App\Http\Controllers\API\ObligationController;
+use App\Http\Controllers\API\PolicyController;
+use App\Http\Controllers\API\AttestationController;
 
 // ----------------------
 // CORS preflight
@@ -163,5 +167,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/kris/breaches/active', [KriBreachController::class, 'active']);
     Route::post('/kris/breaches/{breach}/ack', [KriBreachController::class, 'acknowledge']);
     Route::get('/kris/readings/batch', [KriReadingBatchController::class, 'batch']);
+
+    // Frameworks
+  Route::get('/frameworks', [FrameworkController::class,'index']);
+  Route::get('/frameworks/{framework}', [FrameworkController::class,'show']);
+  Route::post('/frameworks/{framework}/requirements/{requirement}/map-control', [FrameworkController::class,'mapControl']);
+  Route::delete('/frameworks/{framework}/requirements/{requirement}/map-control/{controlId}', [FrameworkController::class,'unmapControl']);
+
+  // Obligations
+  Route::get('/obligations', [ObligationController::class,'index']);
+  Route::post('/obligations', [ObligationController::class,'store']);
+  Route::put('/obligations/{obligation}', [ObligationController::class,'update']);
+  Route::delete('/obligations/{obligation}', [ObligationController::class,'destroy']);
+
+  // Policies
+  Route::get('/policies', [PolicyController::class,'index']);
+  Route::post('/policies', [PolicyController::class,'store']);
+  Route::get('/policies/{policy}', [PolicyController::class,'show']);
+  Route::put('/policies/{policy}', [PolicyController::class,'update']);
+  Route::post('/policies/{policy}/versions', [PolicyController::class,'addVersion']);
+  Route::post('/policies/{policy}/transition', [PolicyController::class,'transition']);
+
+  // Attestations
+  Route::get('/my-attestations', [AttestationController::class,'myList']);
+  Route::post('/policies/{policy}/attest', [AttestationController::class,'attest']);
+
 
 });
