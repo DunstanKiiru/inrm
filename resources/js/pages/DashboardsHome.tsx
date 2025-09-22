@@ -2,12 +2,12 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { listDashboards, Dashboard } from "../lib/dashApi";
+import { listDashboardsQuery, Dashboard } from "../lib/dashApi";
 
 export default function DashboardsHome() {
     const { data, isLoading, isError } = useQuery({
         queryKey: ["dashboards"],
-        queryFn: listDashboards,
+        queryFn: listDashboardsQuery,
     });
 
     if (isLoading) {
@@ -22,7 +22,6 @@ export default function DashboardsHome() {
         );
     }
 
-    // ✅ always have an array
     const dashboards: Dashboard[] = data ?? [];
 
     const totalMetrics = dashboards.reduce(

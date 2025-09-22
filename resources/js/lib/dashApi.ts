@@ -22,6 +22,13 @@ export async function listDashboards(role?: string): Promise<Dashboard[]> {
   return [];
 }
 
+// TanStack Query compatible version
+export async function listDashboardsQuery(context: any): Promise<Dashboard[]> {
+  // Extract role from queryKey if provided: ["dashboards", "admin"]
+  const role = context.queryKey.length > 1 ? context.queryKey[1] : undefined;
+  return listDashboards(role);
+}
+
 export async function getDashboard(id: number) {
   const { data } = await api.get(`/api/dashboards/${id}`);
   return data;
