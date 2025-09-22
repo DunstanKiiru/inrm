@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Link,
+    useLocation,
+    Navigate,
+} from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Pages
 import Welcome from "./pages/Welcome";
 import DashboardsHome from "./pages/DashboardsHome";
 import DashboardView from "./pages/DashboardView";
@@ -8,13 +17,22 @@ import AuditPlansList from "./pages/AuditPlansList";
 import AuditPlanDetail from "./pages/AuditPlanDetail";
 import NewAuditPlan from "./pages/NewAuditPlan";
 import Login from "./pages/Login";
+import FrameworkExplorer from "./pages/FrameworkExplorer";
+import ObligationsRegister from "./pages/ObligationsRegister";
+import PolicyList from "./pages/PolicyList";
+import PolicyDetail from "./pages/PolicyDetail";
+import MyAttestations from "./pages/MyAttestations";
+
+// Auth helpers
 import { isAuthenticated, getCurrentUser, logout } from "./lib/authApi";
 
 const queryClient = new QueryClient();
 
 // Protected Route component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-    const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+    const [authStatus, setAuthStatus] = useState<
+        "loading" | "authenticated" | "unauthenticated"
+    >("loading");
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -22,22 +40,22 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
                 try {
                     const user = await getCurrentUser();
                     if (user) {
-                        setAuthStatus('authenticated');
+                        setAuthStatus("authenticated");
                     } else {
-                        setAuthStatus('unauthenticated');
+                        setAuthStatus("unauthenticated");
                     }
-                } catch (error) {
-                    setAuthStatus('unauthenticated');
+                } catch {
+                    setAuthStatus("unauthenticated");
                 }
             } else {
-                setAuthStatus('unauthenticated');
+                setAuthStatus("unauthenticated");
             }
         };
 
         checkAuth();
     }, []);
 
-    if (authStatus === 'loading') {
+    if (authStatus === "loading") {
         return (
             <div className="d-flex justify-content-center align-items-center min-vh-100">
                 <div className="spinner-border text-primary" role="status">
@@ -47,14 +65,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
         );
     }
 
-    if (authStatus === 'unauthenticated') {
+    if (authStatus === "unauthenticated") {
         return <Navigate to="/login" replace />;
     }
 
     return <>{children}</>;
 }
 
-// Navigation component that uses useLocation
+// Navigation component
 function Navigation() {
     const location = useLocation();
     const [isAuth, setIsAuth] = useState(false);
@@ -66,7 +84,7 @@ function Navigation() {
                 try {
                     const user = await getCurrentUser();
                     setIsAuth(!!user);
-                } catch (error) {
+                } catch {
                     setIsAuth(false);
                 }
             } else {
@@ -74,34 +92,19 @@ function Navigation() {
             }
             setLoading(false);
         };
-
         checkAuth();
     }, []);
 
     const handleLogout = async () => {
         try {
             await logout();
+        } catch {
+            console.error("Logout failed");
+        } finally {
             setIsAuth(false);
-            window.location.href = '/';
-        } catch (error) {
-            console.error('Logout failed:', error);
-            // Even if logout fails, redirect to home page
-            window.location.href = '/';
+            window.location.href = "/";
         }
     };
-
-    if (loading) {
-        return (
-            <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow">
-                <div className="container-fluid">
-                    <Link className="navbar-brand fw-bold" to="/">
-                        <i className="fas fa-shield-alt me-2"></i>
-                        INRM System
-                    </Link>
-                </div>
-            </nav>
-        );
-    }
 
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow">
@@ -110,7 +113,6 @@ function Navigation() {
                     <i className="fas fa-shield-alt me-2"></i>
                     INRM System
                 </Link>
-
                 <button
                     className="navbar-toggler"
                     type="button"
@@ -127,7 +129,9 @@ function Navigation() {
                     <ul className="navbar-nav me-auto">
                         <li className="nav-item">
                             <Link
-                                className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+                                className={`nav-link ${
+                                    location.pathname === "/" ? "active" : ""
+                                }`}
                                 to="/"
                             >
                                 <i className="fas fa-home me-1"></i>
@@ -136,7 +140,11 @@ function Navigation() {
                         </li>
                         <li className="nav-item">
                             <Link
-                                className={`nav-link ${location.pathname.startsWith('/dashboards') ? 'active' : ''}`}
+                                className={`nav-link ${
+                                    location.pathname.startsWith("/dashboards")
+                                        ? "active"
+                                        : ""
+                                }`}
                                 to="/dashboards"
                             >
                                 <i className="fas fa-chart-line me-1"></i>
@@ -145,11 +153,65 @@ function Navigation() {
                         </li>
                         <li className="nav-item">
                             <Link
-                                className={`nav-link ${location.pathname.startsWith('/audits') ? 'active' : ''}`}
+                                className={`nav-link ${
+                                    location.pathname.startsWith("/audits")
+                                        ? "active"
+                                        : ""
+                                }`}
                                 to="/audits/plans"
                             >
                                 <i className="fas fa-clipboard-check me-1"></i>
                                 Audit Plans
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link ${
+                                    location.pathname.startsWith("/frameworks")
+                                        ? "active"
+                                        : ""
+                                }`}
+                                to="/frameworks"
+                            >
+                                Frameworks
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link ${
+                                    location.pathname.startsWith("/obligations")
+                                        ? "active"
+                                        : ""
+                                }`}
+                                to="/obligations"
+                            >
+                                Obligations
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link ${
+                                    location.pathname.startsWith("/policies")
+                                        ? "active"
+                                        : ""
+                                }`}
+                                to="/policies"
+                            >
+                                Policies
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link ${
+                                    location.pathname.startsWith(
+                                        "/my-attestations"
+                                    )
+                                        ? "active"
+                                        : ""
+                                }`}
+                                to="/my-attestations"
+                            >
+                                My Attestations
                             </Link>
                         </li>
                     </ul>
@@ -167,8 +229,21 @@ function Navigation() {
                                     User
                                 </button>
                                 <ul className="dropdown-menu dropdown-menu-end">
-                                    <li><a className="dropdown-item" href="#"><i className="fas fa-cog me-2"></i>Settings</a></li>
-                                    <li><button className="dropdown-item" onClick={handleLogout}><i className="fas fa-sign-out-alt me-2"></i>Logout</button></li>
+                                    <li>
+                                        <a className="dropdown-item" href="#">
+                                            <i className="fas fa-cog me-2"></i>
+                                            Settings
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="dropdown-item"
+                                            onClick={handleLogout}
+                                        >
+                                            <i className="fas fa-sign-out-alt me-2"></i>
+                                            Logout
+                                        </button>
+                                    </li>
                                 </ul>
                             </li>
                         ) : (
@@ -198,48 +273,122 @@ function App() {
                     <Routes>
                         <Route path="/login" element={<Login />} />
                         <Route path="/" element={<Welcome />} />
-                        <Route path="/dashboard" element={
-                            <ProtectedRoute>
-                                <main className="container-fluid py-4">
-                                    <DashboardsHome />
-                                </main>
-                            </ProtectedRoute>
-                        } />
-                        <Route path="/dashboards" element={
-                            <ProtectedRoute>
-                                <main className="container-fluid py-4">
-                                    <DashboardsHome />
-                                </main>
-                            </ProtectedRoute>
-                        } />
-                        <Route path="/dashboards/:id" element={
-                            <ProtectedRoute>
-                                <main className="container-fluid py-4">
-                                    <DashboardView />
-                                </main>
-                            </ProtectedRoute>
-                        } />
-                        <Route path="/audits/plans" element={
-                            <ProtectedRoute>
-                                <main className="container-fluid py-4">
-                                    <AuditPlansList />
-                                </main>
-                            </ProtectedRoute>
-                        } />
-                        <Route path="/audits/plans/new" element={
-                            <ProtectedRoute>
-                                <main className="container-fluid py-4">
-                                    <NewAuditPlan />
-                                </main>
-                            </ProtectedRoute>
-                        } />
-                        <Route path="/audits/plans/:id" element={
-                            <ProtectedRoute>
-                                <main className="container-fluid py-4">
-                                    <AuditPlanDetail />
-                                </main>
-                            </ProtectedRoute>
-                        } />
+
+                        {/* Dashboards */}
+                        <Route
+                            path="/dashboard"
+                            element={
+                                <ProtectedRoute>
+                                    <main className="container-fluid py-4">
+                                        <DashboardsHome />
+                                    </main>
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/dashboards"
+                            element={
+                                <ProtectedRoute>
+                                    <main className="container-fluid py-4">
+                                        <DashboardsHome />
+                                    </main>
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/dashboards/:id"
+                            element={
+                                <ProtectedRoute>
+                                    <main className="container-fluid py-4">
+                                        <DashboardView />
+                                    </main>
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Audit Plans */}
+                        <Route
+                            path="/audits/plans"
+                            element={
+                                <ProtectedRoute>
+                                    <main className="container-fluid py-4">
+                                        <AuditPlansList />
+                                    </main>
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/audits/plans/new"
+                            element={
+                                <ProtectedRoute>
+                                    <main className="container-fluid py-4">
+                                        <NewAuditPlan />
+                                    </main>
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/audits/plans/:id"
+                            element={
+                                <ProtectedRoute>
+                                    <main className="container-fluid py-4">
+                                        <AuditPlanDetail />
+                                    </main>
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Frameworks, Obligations, Policies, My Attestations */}
+                        <Route
+                            path="/frameworks"
+                            element={
+                                <ProtectedRoute>
+                                    <main className="container-fluid py-4">
+                                        <FrameworkExplorer />
+                                    </main>
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/obligations"
+                            element={
+                                <ProtectedRoute>
+                                    <main className="container-fluid py-4">
+                                        <ObligationsRegister />
+                                    </main>
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/policies"
+                            element={
+                                <ProtectedRoute>
+                                    <main className="container-fluid py-4">
+                                        <PolicyList />
+                                    </main>
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/policies/:id"
+                            element={
+                                <ProtectedRoute>
+                                    <main className="container-fluid py-4">
+                                        <PolicyDetail />
+                                    </main>
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/my-attestations"
+                            element={
+                                <ProtectedRoute>
+                                    <main className="container-fluid py-4">
+                                        <MyAttestations />
+                                    </main>
+                                </ProtectedRoute>
+                            }
+                        />
                     </Routes>
                 </div>
             </Router>
