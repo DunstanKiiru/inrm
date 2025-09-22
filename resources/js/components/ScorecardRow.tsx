@@ -1,3 +1,5 @@
+import React from 'react'
+
 export default function ScorecardRow({ title, current, target, unit, direction }:{ title:string, current:number, target:number, unit?:string, direction?:'up'|'down' }){
   const good = direction==='up' ? current>=target : current<=target
   return (

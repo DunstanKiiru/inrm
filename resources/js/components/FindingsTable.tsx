@@ -1,6 +1,6 @@
+import React, { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { addFinding, updateFinding } from '../lib/auditsApi'
-import { useState } from 'react'
 
 export default function FindingsTable({ planId, plan }:{ planId:number, plan:any }){
   const qc = useQueryClient()

@@ -1,3 +1,5 @@
+import React from 'react'
+
 export default function PlanStatusBadge({ status }:{ status:string }){
   const map:Record<string,string> = {
     planned:'#e5e7eb', fieldwork:'#bfdbfe', reporting:'#fde68a', follow_up:'#c7f9cc', closed:'#d1fae5'

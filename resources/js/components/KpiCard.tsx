@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 
 export default function KpiCard({ title, latest, series, unit, target, direction }:{ title:string, latest:any, series:any[], unit?:string, target?:number, direction?:'up'|'down' }){
   const value = latest?.value ?? '-'
