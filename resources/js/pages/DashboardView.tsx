@@ -1,111 +1,52 @@
+// View.tsx
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { getDashboard, sendDigestNow } from "../lib/dashApi";
-import KpiCard from "../components/KpiCard";
-import BoardPackButtons from "../components/BoardPackButtons";
 
 export default function DashboardView() {
-    const { id = "" } = useParams();
-    const did = Number(id);
+    const { id } = useParams();
+    const dashboardId = Number(id);
     const [emails, setEmails] = useState("");
 
-    const q = useQuery({
-        queryKey: ["dashboard", did],
-        queryFn: () => getDashboard(did),
-        enabled: !isNaN(did),
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ["dashboard", dashboardId],
+        queryFn: () => getDashboard(dashboardId),
+        enabled: !!dashboardId,
     });
 
-    // ---------------------------
-    // Loading / error handling
-    // ---------------------------
-    if (q.isLoading) return <p className="text-gray-600">Loading dashboard…</p>;
-    if (q.isError)
-        return (
-            <p className="text-red-600">
-                Failed to load dashboard (ID {did}). Check the API.
-            </p>
-        );
+    if (isLoading) return <p>Loading dashboard…</p>;
+    if (isError) return <p className="text-red-600">Error loading dashboard</p>;
 
-    const data = q.data;
-    const dashboard = data?.dashboard;
-    const resolved = data?.resolved ?? [];
+    const dashboard = data?.dashboard ?? data;
 
-    if (!dashboard) {
-        return <p className="text-gray-700">No dashboard found.</p>;
-    }
+    if (!dashboard) return <p>No dashboard found.</p>;
 
     return (
-        <div>
-            {/* Title & Buttons */}
-            <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl font-bold">{dashboard.title}</h1>
-                <BoardPackButtons dashboard={dashboard} />
-            </div>
+        <div className="p-6">
+            <h1 className="text-xl font-bold mb-4">{dashboard.title}</h1>
 
-            {/* KPI / widgets grid */}
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {resolved.map((row: any, i: number) =>
-                    row.kpi ? (
-                        <KpiCard
-                            key={i}
-                            title={row.kpi.title}
-                            latest={row.latest}
-                            series={row.series}
-                            unit={row.kpi.unit}
-                            target={row.kpi.target}
-                            direction={row.kpi.direction}
-                        />
-                    ) : row.data ? (
-                        <div
-                            key={i}
-                            className="border rounded-xl p-4 bg-white shadow-sm"
-                        >
-                            <div className="font-semibold">
-                                {row.widget.title}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                                Multiple KPIs
-                            </div>
-                        </div>
-                    ) : (
-                        <div
-                            key={i}
-                            className="border rounded-xl p-4 bg-white shadow-sm"
-                        >
-                            {row.widget.title}
-                        </div>
-                    )
-                )}
-            </div>
-
-            {/* Email digest */}
-            <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">
-                    Send email digest now
-                </h3>
-                <div className="flex gap-2 items-center">
-                    <input
-                        placeholder="comma-separated emails"
-                        value={emails}
-                        onChange={(e) => setEmails(e.target.value)}
-                        className="border rounded px-3 py-1 min-w-[300px]"
-                    />
-                    <button
-                        onClick={() =>
-                            sendDigestNow(
-                                did,
-                                emails
-                                    .split(",")
-                                    .map((x) => x.trim())
-                                    .filter(Boolean)
-                            )
-                        }
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded"
-                    >
-                        Send
-                    </button>
-                </div>
+            <div className="mb-4">
+                <input
+                    className="border px-3 py-1 rounded mr-2"
+                    placeholder="Comma-separated emails"
+                    value={emails}
+                    onChange={(e) => setEmails(e.target.value)}
+                />
+                <button
+                    onClick={() =>
+                        sendDigestNow(
+                            dashboardId,
+                            emails
+                                .split(",")
+                                .map((x) => x.trim())
+                                .filter(Boolean)
+                        )
+                    }
+                    className="btn btn-primary"
+                >
+                    Send digest
+                </button>
             </div>
         </div>
     );
