@@ -10,21 +10,21 @@ class LoginController extends Controller
 {
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email'    => ['required','email'],
-            'password' => ['required'],
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            return response()->json([
-                'message' => 'Login successful',
-                'user'    => Auth::user(),
-            ]);
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        return response()->json(['message' => 'Invalid credentials'], 401);
+        $user  = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'user'  => $user,
+            'token' => $token,
+        ]);
     }
 }
-
