@@ -33,6 +33,8 @@ import KriDetail from "./pages/KriDetail";
 import ControlsList from "./pages/ControlsList";
 import ControlDetail from "./pages/ControlDetail";
 import ControlTestingQueue from "./pages/ControlTestingQueue";
+import ControlEffectivenessDashboard from "./pages/ControlEffectivenessDashboard";
+import ControlDrilldown from "./pages/ControlDrilldown";
 
 // Auth helpers
 import { isAuthenticated, getCurrentUser, logout } from "./lib/authApi";
@@ -168,6 +170,11 @@ function Navigation() {
                         <li className="nav-item">
                             <Link className={`nav-link ${location.pathname.startsWith("/controls/testing") ? "active" : ""}`} to="/controls/testing">
                                 Testing Queue
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className={`nav-link ${location.pathname.startsWith("/controls/analytics") ? "active" : ""}`} to="/controls/analytics">
+                                Control Effectiveness
                             </Link>
                         </li>
                         <li className="nav-item">
@@ -308,6 +315,14 @@ function App() {
                         <Route
                             path="/controls/:id"
                             element={<ProtectedRoute><main className="container-fluid py-4"><ControlDetail /></main></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/controls/analytics"
+                            element={<ProtectedRoute><main className="container-fluid py-4"><ControlEffectivenessDashboard /></main></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/controls/:id/drilldown"
+                            element={<ProtectedRoute><main className="container-fluid py-4"><ControlDrilldown /></main></ProtectedRoute>}
                         />
 
                         {/* Frameworks */}
