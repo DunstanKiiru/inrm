@@ -30,6 +30,10 @@ import AssessmentDetail from "./pages/AssessmentDetail";
 import KriList from "./pages/KriList";
 import KriDetail from "./pages/KriDetail";
 
+import ControlsList from "./pages/ControlsList";
+import ControlDetail from "./pages/ControlDetail";
+import ControlTestingQueue from "./pages/ControlTestingQueue";
+
 // Auth helpers
 import { isAuthenticated, getCurrentUser, logout } from "./lib/authApi";
 
@@ -157,6 +161,16 @@ function Navigation() {
                             </Link>
                         </li>
                         <li className="nav-item">
+                            <Link className={`nav-link ${location.pathname.startsWith("/controls") ? "active" : ""}`} to="/controls">
+                                Controls
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className={`nav-link ${location.pathname.startsWith("/controls/testing") ? "active" : ""}`} to="/controls/testing">
+                                Testing Queue
+                            </Link>
+                        </li>
+                        <li className="nav-item">
                             <Link className={`nav-link ${location.pathname.startsWith("/frameworks") ? "active" : ""}`} to="/frameworks">
                                 Frameworks
                             </Link>
@@ -280,6 +294,20 @@ function App() {
                         <Route
                             path="/kris/:id"
                             element={<ProtectedRoute><main className="container-fluid py-4"><KriDetail /></main></ProtectedRoute>}
+                        />
+
+                        {/* Controls */}
+                        <Route
+                            path="/controls"
+                            element={<ProtectedRoute><main className="container-fluid py-4"><ControlsList /></main></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/controls/testing"
+                            element={<ProtectedRoute><main className="container-fluid py-4"><ControlTestingQueue /></main></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/controls/:id"
+                            element={<ProtectedRoute><main className="container-fluid py-4"><ControlDetail /></main></ProtectedRoute>}
                         />
 
                         {/* Frameworks */}
