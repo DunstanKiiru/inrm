@@ -58,7 +58,9 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::post('/logout', function (Request $request) {
-        $request->user()->tokens()->where('id', $request->user()->currentAccessToken()->id)->delete();
+        $request->user()->tokens()
+            ->where('id', $request->user()->currentAccessToken()->id)
+            ->delete();
         return response()->json(['message' => 'Logged out successfully']);
     });
 
@@ -116,25 +118,31 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/controls/{control}', [ControlController::class, 'update']);
     Route::delete('/controls/{control}', [ControlController::class, 'destroy']);
 
+    // Control categories
     Route::get('/control-categories', [ControlController::class, 'categories']);
     Route::post('/control-categories', [ControlController::class, 'storeCategory']);
 
+    // Risk mapping
     Route::post('/controls/{control}/map-risks', [ControlMappingController::class, 'mapRisks']);
     Route::get('/controls/{control}/risks', [ControlMappingController::class, 'risks']);
 
+    // Test plans
     Route::get('/controls/{control}/test-plans', [ControlTestPlanController::class, 'index']);
     Route::post('/controls/{control}/test-plans', [ControlTestPlanController::class, 'store']);
     Route::put('/control-test-plans/{plan}', [ControlTestPlanController::class, 'update']);
     Route::delete('/control-test-plans/{plan}', [ControlTestPlanController::class, 'destroy']);
 
+    // Executions
     Route::post('/control-test-plans/{plan}/execute', [ControlTestExecutionController::class, 'execute']);
     Route::get('/control-test-executions/{execution}', [ControlTestExecutionController::class, 'show']);
 
+    // Issues & remediation
     Route::get('/control-issues', [ControlIssueController::class, 'index']);
     Route::post('/control-issues', [ControlIssueController::class, 'store']);
     Route::put('/control-issues/{controlIssue}', [ControlIssueController::class, 'update']);
     Route::post('/control-issues/{controlIssue}/remediations', [ControlIssueController::class, 'addRemediation']);
 
+    // Control analytics
     Route::get('/controls/analytics/effectiveness-by-category', [ControlAnalyticsController::class, 'effectivenessByCategory']);
     Route::get('/controls/analytics/effectiveness-by-owner', [ControlAnalyticsController::class, 'effectivenessByOwner']);
     Route::get('/controls/analytics/passrate-series', [ControlAnalyticsController::class, 'passrateSeries']);
