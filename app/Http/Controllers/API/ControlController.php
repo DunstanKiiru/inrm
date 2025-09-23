@@ -28,6 +28,7 @@ class ControlController extends Controller
     public function update(Request $r, Control $control){ $control->update($r->all()); return $control->fresh()->load(['category','owner']); }
     public function destroy(Control $control){ $control->delete(); return response()->noContent(); }
 
+    
     // Categories quick endpoints (optional)
     public function categories(){ return ControlCategory::orderBy('name')->get(); }
     public function storeCategory(Request $r){ $data=$r->validate(['name'=>'required','description'=>'nullable']); return ControlCategory::create($data); }
