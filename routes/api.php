@@ -49,7 +49,7 @@ Route::get('/ping', function () {
 });
 
 // ----------------------
-// Auth routes
+// Authenticated routes
 // ----------------------
 Route::middleware('auth:sanctum')->group(function () {
 
