@@ -31,7 +31,9 @@
 
   <h3>Notes</h3>
   <table>
-    <thead><tr><th>Area</th><th>Comment</th></tr></thead>
+    <thead>
+      <tr><th>Area</th><th>Comment</th></tr>
+    </thead>
     <tbody>
       <tr><td>Risk Trends</td><td>Summarize changes in inherent/residual risk for top entities.</td></tr>
       <tr><td>Compliance</td><td>Coverage improvement and outstanding requirements.</td></tr>
