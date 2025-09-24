@@ -26,6 +26,8 @@ import PolicyDetail from "./pages/PolicyDetail";
 import MyAttestations from "./pages/MyAttestations";
 
 import AssessmentsList from "./pages/AssessmentsList";
+import RisksList from "./pages/RisksList";
+import RiskDetail from "./pages/RiskDetail";
 import AssessmentDetail from "./pages/AssessmentDetail";
 import KriList from "./pages/KriList";
 import KriDetail from "./pages/KriDetail";
@@ -197,6 +199,12 @@ function Navigation() {
                                 My Attestations
                             </Link>
                         </li>
+                        <li className="nav-item">
+                            <Link className={`nav-link ${location.pathname.startsWith("/risks") ? "active" : ""}`} to="/risks">
+                                <i className="fas fa-exclamation-triangle me-1"></i>
+                                Risk Register
+                            </Link>
+                        </li>
                     </ul>
 
                     <ul className="navbar-nav">
@@ -351,6 +359,16 @@ function App() {
                         <Route
                             path="/my-attestations"
                             element={<ProtectedRoute><main className="container-fluid py-4"><MyAttestations /></main></ProtectedRoute>}
+                        />
+
+                        {/* Risks */}
+                        <Route
+                            path="/risks"
+                            element={<ProtectedRoute><main className="container-fluid py-4"><RisksList /></main></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/risks/:id"
+                            element={<ProtectedRoute><main className="container-fluid py-4"><RiskDetail /></main></ProtectedRoute>}
                         />
                     </Routes>
                 </div>
