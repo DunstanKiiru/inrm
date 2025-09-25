@@ -39,31 +39,33 @@ export default function DashboardsHome() {
                 </Link>
             </div>
 
-            {/* Active Breaches Card */}
+            {/* Active Breaches Card and Totals */}
             <div className="mb-6">
-                <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:16}}>
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr 1fr",
+                        gap: 16,
+                    }}
+                >
                     <DashboardBreachesCard />
-                    {/* other cards... */}
-                </div>
-            </div>
-
-            <div className="mb-6 flex gap-4">
-                <div className="p-4 bg-blue-100 rounded">
-                    <p className="text-sm">Total Dashboards</p>
-                    <p className="text-xl font-semibold">{dashboards.length}</p>
-                </div>
-                <div className="p-4 bg-green-100 rounded">
-                    <p className="text-sm">Total Metrics</p>
-                    <p className="text-xl font-semibold">{totalMetrics}</p>
+                    <div className="p-4 bg-blue-100 rounded text-center">
+                        <p className="text-sm">Total Dashboards</p>
+                        <p className="text-xl font-semibold">{dashboards.length}</p>
+                    </div>
+                    <div className="p-4 bg-green-100 rounded text-center">
+                        <p className="text-sm">Total Metrics</p>
+                        <p className="text-xl font-semibold">{totalMetrics}</p>
+                    </div>
                 </div>
             </div>
 
             {dashboards.length > 0 ? (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="flex gap-4 mb-6 overflow-x-auto">
                     {dashboards.map((d) => (
                         <div
                             key={d.id}
-                            className="border rounded p-4 shadow bg-white"
+                            className="border rounded p-4 shadow bg-white flex-shrink-0 w-80"
                         >
                             <div className="flex justify-between items-start mb-2">
                                 <div>
@@ -96,10 +98,12 @@ export default function DashboardsHome() {
                     ))}
                 </div>
             ) : (
-                <div className="p-8 text-center text-gray-500 border rounded">
+                <div className="p-8 text-center text-gray-500 border rounded mb-6">
                     No dashboards available. Create one to get started.
                 </div>
             )}
+
+
         </div>
     );
 }
