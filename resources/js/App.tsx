@@ -48,6 +48,183 @@ import { isAuthenticated, getCurrentUser, logout } from "./lib/authApi";
 const queryClient = new QueryClient();
 
 // ----------------------
+// App
+// ----------------------
+function App() {
+    const [isAuth, setIsAuth] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            if (isAuthenticated()) {
+                try {
+                    const user = await getCurrentUser();
+                    setIsAuth(!!user);
+                } catch {
+                    setIsAuth(false);
+                }
+            } else {
+                setIsAuth(false);
+            }
+            setLoading(false);
+        };
+        checkAuth();
+    }, []);
+
+    if (loading) {
+        return (
+            <QueryClientProvider client={queryClient}>
+                <div className="d-flex justify-content-center align-items-center min-vh-100">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </QueryClientProvider>
+        );
+    }
+
+    return (
+        <QueryClientProvider client={queryClient}>
+            <Router>
+                {isAuth ? (
+                    <div style={{display:'grid', gridTemplateRows:'auto 1fr', height:'100vh'}}>
+                        <HeaderBar/>
+                        <div style={{display:'grid', gridTemplateColumns:'220px 1fr'}}>
+                            <Sidebar />
+                            <div className="min-vh-100 bg-light">
+                                <Routes>
+                                    {/* Public */}
+                                    <Route path="/login" element={<Navigate to="/" replace />} />
+                                    <Route path="/" element={<Navigate to="/dashboards" replace />} />
+
+                                    {/* Dashboards */}
+                                    <Route
+                                        path="/dashboard"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><DashboardsHome /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/dashboards"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><DashboardsHome /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/dashboards/:id"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><DashboardView /></main></ProtectedRoute>}
+                                    />
+
+                                    {/* Audit Plans */}
+                                    <Route
+                                        path="/audits/plans"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><AuditPlansList /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/audits/plans/new"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><NewAuditPlan /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/audits/plans/:id"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><AuditPlanDetail /></main></ProtectedRoute>}
+                                    />
+
+                                    {/* Assessments */}
+                                    <Route
+                                        path="/assessments"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><AssessmentsList /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/assessments/:id"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><AssessmentDetail /></main></ProtectedRoute>}
+                                    />
+
+                                    {/* KRIs */}
+                                    <Route
+                                        path="/kris"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><KriList /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/kris/:id"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><KriDetail /></main></ProtectedRoute>}
+                                    />
+
+                                    {/* Controls */}
+                                    <Route
+                                        path="/controls"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><ControlsList /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/controls/testing"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><ControlTestingQueue /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/controls/:id"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><ControlDetail /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/controls/analytics"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><ControlEffectivenessDashboard /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/controls/:id/drilldown"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><ControlDrilldown /></main></ProtectedRoute>}
+                                    />
+
+                                    {/* Frameworks */}
+                                    <Route
+                                        path="/frameworks"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><FrameworkExplorer /></main></ProtectedRoute>}
+                                    />
+
+                                    {/* Obligations */}
+                                    <Route
+                                        path="/obligations"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><ObligationsRegister /></main></ProtectedRoute>}
+                                    />
+
+                                    {/* Policies */}
+                                    <Route
+                                        path="/policies"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><PolicyList /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/policies/:id"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><PolicyDetail /></main></ProtectedRoute>}
+                                    />
+
+                                    {/* My Attestations */}
+                                    <Route
+                                        path="/my-attestations"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><MyAttestations /></main></ProtectedRoute>}
+                                    />
+
+                                    {/* Risks */}
+                                    <Route
+                                        path="/risks"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><RisksList /></main></ProtectedRoute>}
+                                    />
+                                    <Route
+                                        path="/risks/:id"
+                                        element={<ProtectedRoute><main className="container-fluid py-4"><RiskDetail /></main></ProtectedRoute>}
+                                    />
+                                </Routes>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="min-vh-100 bg-light">
+                        <Routes>
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/" element={<Welcome />} />
+                            <Route path="*" element={<Navigate to="/login" replace />} />
+                        </Routes>
+                    </div>
+                )}
+            </Router>
+        </QueryClientProvider>
+    );
+}
+
+export default App;
+
+// ----------------------
 // Protected Route
 // ----------------------
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -87,137 +264,4 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 
 
-// ----------------------
-// App
-// ----------------------
-function App() {
-    return (
-        <QueryClientProvider client={queryClient}>
-            <Router>
-                <div style={{display:'grid', gridTemplateRows:'auto 1fr', height:'100vh'}}>
-                    <HeaderBar/>
-                    <div style={{display:'grid', gridTemplateColumns:'220px 1fr'}}>
-                        <Sidebar />
-                        <div className="min-vh-100 bg-light">
-                            <Routes>
-                                {/* Public */}
-                                <Route path="/login" element={<Login />} />
-                                <Route path="/" element={<Welcome />} />
 
-                                {/* Dashboards */}
-                                <Route
-                                    path="/dashboard"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><DashboardsHome /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/dashboards"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><DashboardsHome /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/dashboards/:id"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><DashboardView /></main></ProtectedRoute>}
-                                />
-
-                                {/* Audit Plans */}
-                                <Route
-                                    path="/audits/plans"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><AuditPlansList /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/audits/plans/new"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><NewAuditPlan /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/audits/plans/:id"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><AuditPlanDetail /></main></ProtectedRoute>}
-                                />
-
-                                {/* Assessments */}
-                                <Route
-                                    path="/assessments"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><AssessmentsList /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/assessments/:id"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><AssessmentDetail /></main></ProtectedRoute>}
-                                />
-
-                                {/* KRIs */}
-                                <Route
-                                    path="/kris"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><KriList /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/kris/:id"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><KriDetail /></main></ProtectedRoute>}
-                                />
-
-                                {/* Controls */}
-                                <Route
-                                    path="/controls"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><ControlsList /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/controls/testing"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><ControlTestingQueue /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/controls/:id"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><ControlDetail /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/controls/analytics"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><ControlEffectivenessDashboard /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/controls/:id/drilldown"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><ControlDrilldown /></main></ProtectedRoute>}
-                                />
-
-                                {/* Frameworks */}
-                                <Route
-                                    path="/frameworks"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><FrameworkExplorer /></main></ProtectedRoute>}
-                                />
-
-                                {/* Obligations */}
-                                <Route
-                                    path="/obligations"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><ObligationsRegister /></main></ProtectedRoute>}
-                                />
-
-                                {/* Policies */}
-                                <Route
-                                    path="/policies"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><PolicyList /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/policies/:id"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><PolicyDetail /></main></ProtectedRoute>}
-                                />
-
-                                {/* My Attestations */}
-                                <Route
-                                    path="/my-attestations"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><MyAttestations /></main></ProtectedRoute>}
-                                />
-
-                                {/* Risks */}
-                                <Route
-                                    path="/risks"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><RisksList /></main></ProtectedRoute>}
-                                />
-                                <Route
-                                    path="/risks/:id"
-                                    element={<ProtectedRoute><main className="container-fluid py-4"><RiskDetail /></main></ProtectedRoute>}
-                                />
-                            </Routes>
-                        </div>
-                    </div>
-                </div>
-            </Router>
-        </QueryClientProvider>
-    );
-}
-
-export default App;

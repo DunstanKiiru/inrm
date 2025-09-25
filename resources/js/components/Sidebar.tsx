@@ -38,18 +38,12 @@ function Sidebar() {
     }
 
     return (
-        <div className="sidebar bg-primary text-white p-3" style={{ height: '100vh', overflowY: 'auto' }}>
+        <div className="sidebar text-white p-3" style={{ height: '100vh', overflowY: 'auto', backgroundColor: '#008000' }}>
             <h5 className="mb-4">
                 <i className="fas fa-shield-alt me-2"></i>
                 INRM System
             </h5>
             <ul className="nav flex-column">
-                <li className="nav-item mb-2">
-                    <Link className={`nav-link text-white ${location.pathname === "/" ? "active" : ""}`} to="/">
-                        <i className="fas fa-home me-1"></i>
-                        Home
-                    </Link>
-                </li>
                 <li className="nav-item mb-2">
                     <Link className={`nav-link text-white ${location.pathname.startsWith("/dashboards") ? "active" : ""}`} to="/dashboards">
                         <i className="fas fa-chart-line me-1"></i>
@@ -72,20 +66,15 @@ function Sidebar() {
                         KRIs
                     </Link>
                 </li>
-                <li className="nav-item mb-2">
-                    <Link className={`nav-link text-white ${location.pathname.startsWith("/controls") ? "active" : ""}`} to="/controls">
+                <li className="nav-item mb-2 dropdown">
+                    <a className="nav-link text-white dropdown-toggle" href="#" id="controlsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Controls
-                    </Link>
-                </li>
-                <li className="nav-item mb-2">
-                    <Link className={`nav-link text-white ${location.pathname.startsWith("/controls/testing") ? "active" : ""}`} to="/controls/testing">
-                        Testing Queue
-                    </Link>
-                </li>
-                <li className="nav-item mb-2">
-                    <Link className={`nav-link text-white ${location.pathname.startsWith("/controls/analytics") ? "active" : ""}`} to="/controls/analytics">
-                        Control Effectiveness
-                    </Link>
+                    </a>
+                    <ul className="dropdown-menu" style={{backgroundColor: '#008000'}} aria-labelledby="controlsDropdown">
+                        <li><Link className="dropdown-item text-white" to="/controls">Controls</Link></li>
+                        <li><Link className="dropdown-item text-white" to="/controls/testing">Testing Queue</Link></li>
+                        <li><Link className="dropdown-item text-white" to="/controls/analytics">Control Effectiveness</Link></li>
+                    </ul>
                 </li>
                 <li className="nav-item mb-2">
                     <Link className={`nav-link text-white ${location.pathname.startsWith("/frameworks") ? "active" : ""}`} to="/frameworks">

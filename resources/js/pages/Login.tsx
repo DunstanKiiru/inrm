@@ -17,7 +17,7 @@ const Login = () => {
         try {
             const response = await login({ email, password });
             setAuthToken(response.token);
-            navigate("/dashboard");
+            navigate("/dashboards");
         } catch (err: any) {
             if (err.response?.status === 401) {
                 setError("Invalid email or password. Please check your credentials and try again.");
@@ -32,93 +32,55 @@ const Login = () => {
     };
 
     return (
-        <div style={{
-            maxWidth: 400,
-            margin: "2rem auto",
-            padding: "2rem",
-            border: "1px solid #ccc",
-            borderRadius: 8,
-            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-            backgroundColor: "#fff"
-        }}>
-            <h2 style={{ textAlign: "center", marginBottom: "1.5rem", color: "#333" }}>Login</h2>
+        <div className="d-flex justify-content-center align-items-center min-vh-100">
+            <div className="card" style={{minWidth: 320, maxWidth: 400, width: '100%'}}>
+                <div className="card-body">
+                    <h2 className="card-title text-center mb-4">Login</h2>
 
-            {error && (
-                <div style={{
-                    color: "#d32f2f",
-                    backgroundColor: "#ffebee",
-                    padding: "0.5rem",
-                    borderRadius: 4,
-                    marginBottom: "1rem",
-                    textAlign: "center"
-                }}>
-                    {error}
-                </div>
-            )}
+                    {error && (
+                        <div className="alert alert-danger" role="alert">
+                            {error}
+                        </div>
+                    )}
 
-            <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: "1rem" }}>
-                    <label htmlFor="email" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold" }}>
-                        Email:
-                    </label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={loading}
-                        style={{
-                            width: "100%",
-                            padding: "0.75rem",
-                            border: "1px solid #ddd",
-                            borderRadius: 4,
-                            fontSize: "1rem",
-                            boxSizing: "border-box"
-                        }}
-                    />
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-3">
+                            <label htmlFor="email" className="form-label fw-bold">
+                                Email:
+                            </label>
+                            <input
+                                type="email"
+                                id="email"
+                                className="form-control"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                disabled={loading}
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <label htmlFor="password" className="form-label fw-bold">
+                                Password:
+                            </label>
+                            <input
+                                type="password"
+                                id="password"
+                                className="form-control"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                disabled={loading}
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="btn btn-primary w-100"
+                            disabled={loading}
+                        >
+                            {loading ? "Logging in..." : "Log In"}
+                        </button>
+                    </form>
                 </div>
-                <div style={{ marginBottom: "1.5rem" }}>
-                    <label htmlFor="password" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold" }}>
-                        Password:
-                    </label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        disabled={loading}
-                        style={{
-                            width: "100%",
-                            padding: "0.75rem",
-                            border: "1px solid #ddd",
-                            borderRadius: 4,
-                            fontSize: "1rem",
-                            boxSizing: "border-box"
-                        }}
-                    />
-                </div>
-                <button
-                    type="submit"
-                    disabled={loading}
-                    style={{
-                        width: "100%",
-                        padding: "0.75rem",
-                        backgroundColor: loading ? "#ccc" : "#007bff",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: 4,
-                        fontSize: "1rem",
-                        cursor: loading ? "not-allowed" : "pointer",
-                        transition: "background-color 0.2s"
-                    }}
-                >
-                    {loading ? "Logging in..." : "Log In"}
-                </button>
-            </form>
-
-            <div style={{ textAlign: "center", marginTop: "1rem" }}>
             </div>
         </div>
     );

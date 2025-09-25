@@ -1,10 +1,8 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
-/* ===== INRM CUSTOM THEME ===== */
 
-/* CSS Custom Properties for consistent theming */
 :root {
-  /* Primary Color Palette */
+  /* Primary Colors mzee */
   --inrm-primary: #2563eb;
   --inrm-primary-light: #3b82f6;
   --inrm-primary-dark: #1d4ed8;
@@ -19,7 +17,7 @@
   --inrm-primary-800: #1e40af;
   --inrm-primary-900: #1e3a8a;
 
-  /* Secondary Colors */
+  /* Secondary Colors mzee*/
   --inrm-secondary: #64748b;
   --inrm-secondary-light: #94a3b8;
   --inrm-secondary-dark: #475569;
@@ -72,9 +70,7 @@
   --inrm-transition-slow: all 0.3s ease-in-out;
 }
 
-/* ===== GLOBAL STYLES ===== */
 
-/* Enhanced body styling */
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: linear-gradient(135deg, var(--inrm-bg-secondary) 0%, var(--inrm-bg-tertiary) 100%);
@@ -83,7 +79,7 @@ body {
   line-height: 1.6;
 }
 
-/* ===== ENHANCED NAVIGATION ===== */
+
 
 .navbar {
   background: linear-gradient(135deg, var(--inrm-primary) 0%, var(--inrm-primary-dark) 100%) !important;
@@ -120,7 +116,7 @@ body {
   border-radius: var(--inrm-radius);
 }
 
-/* ===== ENHANCED CARDS ===== */
+
 
 .card {
   border: none;
@@ -142,7 +138,6 @@ body {
   color: var(--inrm-gray-800);
 }
 
-/* ===== ENHANCED BUTTONS ===== */
 
 .btn {
   border-radius: var(--inrm-radius);
@@ -204,7 +199,7 @@ body {
   background: linear-gradient(135deg, var(--inrm-danger) 0%, #dc2626 100%);
 }
 
-/* ===== ENHANCED FORMS ===== */
+
 
 .form-control {
   border: 2px solid var(--inrm-gray-200);
@@ -237,7 +232,7 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
 }
 
-/* ===== ENHANCED TABLES ===== */
+
 
 .table {
   margin-bottom: 0;
@@ -266,7 +261,7 @@ body {
   transform: scale(1.01);
 }
 
-/* ===== ENHANCED BADGES ===== */
+
 
 .badge {
   font-weight: 500;
@@ -274,7 +269,7 @@ body {
   border-radius: var(--inrm-radius);
 }
 
-/* ===== ENHANCED ALERTS ===== */
+
 
 .alert {
   border: none;
@@ -282,13 +277,13 @@ body {
   box-shadow: var(--inrm-shadow);
 }
 
-/* ===== LOADING STATES ===== */
+
 
 .spinner-border {
   color: var(--inrm-primary);
 }
 
-/* ===== UTILITY CLASSES ===== */
+
 
 .hover-shadow:hover {
   box-shadow: var(--inrm-shadow-lg) !important;
@@ -308,20 +303,18 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* ===== ADDITIONAL ENHANCEMENTS ===== */
 
-/* Gradient Backgrounds */
 .bg-gradient-primary {
   background: linear-gradient(135deg, var(--inrm-primary) 0%, var(--inrm-primary-light) 100%);
 }
 
-/* Hover Effects */
+
 .hover-primary:hover {
   color: var(--inrm-primary) !important;
   transition: var(--inrm-transition);
 }
 
-/* Sparkline Styling */
+
 .sparkline {
   overflow: visible;
 }
@@ -330,7 +323,7 @@ body {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-/* Enhanced Loading States */
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
@@ -340,7 +333,7 @@ body {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Custom Scrollbar */
+
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -358,7 +351,6 @@ body {
   background: var(--inrm-gray-400);
 }
 
-/* Focus Styles */
 *:focus {
   outline: none;
 }
@@ -368,7 +360,7 @@ body {
   outline-offset: 2px;
 }
 
-/* Enhanced Form Validation */
+
 .was-validated .form-control:valid {
   border-color: var(--inrm-success);
 }
@@ -377,13 +369,13 @@ body {
   border-color: var(--inrm-danger);
 }
 
-/* Custom Checkbox and Radio */
+
 .form-check-input:checked {
   background-color: var(--inrm-primary);
   border-color: var(--inrm-primary);
 }
 
-/* Enhanced Dropdown */
+
 .dropdown-menu {
   border: none;
   box-shadow: var(--inrm-shadow-lg);
@@ -395,7 +387,12 @@ body {
   color: var(--inrm-primary);
 }
 
-/* Enhanced Pagination */
+
+.sidebar .dropdown-item:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
 .page-link {
   color: var(--inrm-primary);
   border-color: var(--inrm-gray-200);
@@ -412,7 +409,7 @@ body {
   border-color: var(--inrm-primary);
 }
 
-/* Enhanced Breadcrumbs */
+
 .breadcrumb {
   background: var(--inrm-gray-50);
   border-radius: var(--inrm-radius);
@@ -422,21 +419,19 @@ body {
   color: var(--inrm-primary);
 }
 
-/* Enhanced Tooltips */
+
 .tooltip-inner {
   background-color: var(--inrm-gray-900);
   color: white;
   border-radius: var(--inrm-radius);
 }
 
-/* Enhanced Popovers */
 .popover {
   border: none;
   box-shadow: var(--inrm-shadow-xl);
   border-radius: var(--inrm-radius-lg);
 }
 
-/* Enhanced Modals */
 .modal-content {
   border: none;
   border-radius: var(--inrm-radius-lg);
@@ -449,7 +444,6 @@ body {
   border-radius: var(--inrm-radius-lg) var(--inrm-radius-lg) 0 0;
 }
 
-/* Enhanced Progress Bars */
 .progress {
   height: 8px;
   background-color: var(--inrm-gray-200);
@@ -461,7 +455,6 @@ body {
   border-radius: var(--inrm-radius-full);
 }
 
-/* Enhanced Tabs */
 .nav-tabs {
   border-bottom: 2px solid var(--inrm-gray-200);
 }
@@ -478,7 +471,6 @@ body {
   border-bottom: 2px solid var(--inrm-primary);
 }
 
-/* Enhanced Accordion */
 .accordion-button {
   font-weight: 600;
   color: var(--inrm-gray-800);
@@ -493,7 +485,6 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
 }
 
-/* Enhanced List Group */
 .list-group-item {
   border-color: var(--inrm-gray-200);
   transition: var(--inrm-transition);
@@ -504,7 +495,6 @@ body {
   border-color: var(--inrm-primary);
 }
 
-/* Enhanced Carousel */
 .carousel-control-prev,
 .carousel-control-next {
   background-color: rgba(37, 99, 235, 0.1);
@@ -518,7 +508,6 @@ body {
   background-color: var(--inrm-primary);
 }
 
-/* ===== RESPONSIVE ENHANCEMENTS ===== */
 
 @media (max-width: 768px) {
   .card {
@@ -534,7 +523,6 @@ body {
     text-align: center;
   }
 
-  /* Mobile-specific adjustments */
   .card-body {
     padding: 1rem !important;
   }
@@ -548,12 +536,10 @@ body {
     font-size: 1rem;
   }
 
-  /* Mobile form improvements */
   .form-control {
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
   }
 
-  /* Mobile table improvements */
   .table-responsive {
     font-size: 0.875rem;
   }
@@ -574,7 +560,6 @@ body {
     margin-bottom: 0.75rem;
   }
 
-  /* Extra small screen adjustments */
   .display-4 {
     font-size: 2rem;
   }
@@ -584,7 +569,6 @@ body {
   }
 }
 
-/* ===== PRINT STYLES ===== */
 
 @media print {
   .navbar,
