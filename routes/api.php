@@ -31,6 +31,7 @@ use App\Http\Controllers\API\ControlTestPlanController;
 use App\Http\Controllers\API\ControlTestExecutionController;
 use App\Http\Controllers\API\ControlIssueController;
 use App\Http\Controllers\API\ControlAnalyticsController;
+use App\Http\Controllers\API\MeController;
 
 // ----------------------
 // CORS preflight
@@ -239,4 +240,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/risk-appetite/profiles/{profile}/thresholds', [RiskAppetiteController::class, 'thresholds']);
     Route::post('/risk-appetite/profiles/{profile}/thresholds', [RiskAppetiteController::class, 'storeThreshold']);
     Route::get('/risks/{risk}/breaches', [RiskAppetiteController::class, 'breaches']);
+
+    //Me
+
+     Route::get('/me', [MeController::class, 'me']);
+
 });
