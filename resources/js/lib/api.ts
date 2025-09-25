@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
     config.headers['X-CSRF-TOKEN'] = token
   }
 
-  // Bearer token from storage or authApi
+  // Bearer token from storage/authApi
   const saved = getAuthToken()
   if (saved) {
     config.headers['Authorization'] = `Bearer ${saved}`
@@ -40,7 +40,30 @@ api.interceptors.response.use(
 
 export default api
 
-// Extra helper for file uploads
+// --------------------
+// Helpers
+// --------------------
+export async function fetchMe() {
+  // if your backend already exposes /api/user under sanctum, you can swap this to '/api/user'
+  const { data } = await api.get('/api/me')
+  return data as { id: number; name: string; email: string }
+}
+
+export async function listEvidence(entity_type: string, entity_id: number) {
+  const { data } = await api.get('/api/evidence', {
+    params: { entity_type, entity_id },
+  })
+  return data as Array<{
+    id: number
+    filename: string
+    size: number
+    mime: string
+    sha256: string
+    scanned_status: string
+    created_at: string
+  }>
+}
+
 export async function uploadEvidence(entity_type: string, entity_id: number, file: File) {
   const form = new FormData()
   form.append('entity_type', entity_type)
