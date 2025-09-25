@@ -8,20 +8,28 @@ export default function PolicyList(){
   if(q.isLoading) return <p>Loading…</p>
   const rows = q.data?.data || []
   return (
-    <div>
-      <h1>Policies</h1>
-      <table width="100%" cellPadding={6} style={{borderCollapse:'collapse'}}>
-        <thead><tr><th>Title</th><th>Status</th><th>Effective</th></tr></thead>
-        <tbody>
-          {rows.map((p:any)=>(
-            <tr key={p.id} style={{borderTop:'1px solid #eee'}}>
-              <td><Link to={'/policies/'+p.id}>{p.title}</Link></td>
-              <td><PolicyStatusBadge status={p.status}/></td>
-              <td>{p.effective_date || '-'}</td>
+    <div className="container-fluid py-4">
+      <h1 className="h2 mb-4 text-gradient">Policies</h1>
+      <div className="table-responsive">
+        <table className="table table-hover table-sm mb-0">
+          <thead>
+            <tr>
+              <th className="fw-bold">Title</th>
+              <th className="fw-bold">Status</th>
+              <th className="fw-bold">Effective</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((p:any)=>(
+              <tr key={p.id}>
+                <td><Link to={'/policies/'+p.id} className="text-decoration-none fw-medium">{p.title}</Link></td>
+                <td><PolicyStatusBadge status={p.status}/></td>
+                <td>{p.effective_date || '-'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

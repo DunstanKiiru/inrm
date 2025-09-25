@@ -6,23 +6,34 @@ export default function ControlsList(){
   const { data, isLoading } = useQuery({ queryKey:['controls'], queryFn: ()=> listControls() })
   if(isLoading) return <p>Loading...</p>
   return (
-    <div>
-      <h1>Control Library</h1>
-      <table width="100%" cellPadding={6} style={{borderCollapse:'collapse'}}>
-        <thead><tr><th>Title</th><th>Category</th><th>Owner</th><th>Type</th><th>Frequency</th><th>Status</th></tr></thead>
-        <tbody>
-          {data?.data?.map((c:any)=>(
-            <tr key={c.id} style={{borderTop:'1px solid #eee'}}>
-              <td><Link to={'/controls/'+c.id}>{c.title}</Link></td>
-              <td>{c.category?.name || '-'}</td>
-              <td>{c.owner?.name || '-'}</td>
-              <td>{c.type || '-'}</td>
-              <td>{c.frequency || '-'}</td>
-              <td>{c.status}</td>
+    <div className="container-fluid py-4">
+      <h1 className="h2 mb-4 text-gradient">Control Library</h1>
+      <div className="table-responsive">
+        <table className="table table-hover table-sm mb-0">
+          <thead>
+            <tr>
+              <th className="fw-bold">Title</th>
+              <th className="fw-bold">Category</th>
+              <th className="fw-bold">Owner</th>
+              <th className="fw-bold">Type</th>
+              <th className="fw-bold">Frequency</th>
+              <th className="fw-bold">Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data?.data?.map((c:any)=>(
+              <tr key={c.id}>
+                <td><Link to={'/controls/'+c.id} className="text-decoration-none fw-medium">{c.title}</Link></td>
+                <td>{c.category?.name || '-'}</td>
+                <td>{c.owner?.name || '-'}</td>
+                <td>{c.type || '-'}</td>
+                <td>{c.frequency || '-'}</td>
+                <td>{c.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
