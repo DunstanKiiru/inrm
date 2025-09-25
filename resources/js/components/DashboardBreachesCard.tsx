@@ -129,7 +129,7 @@ export default function DashboardBreachesCard() {
                                             </td>
                                             <td className="text-end">
                                                 <button
-                                                    className="btn btn-sm btn-outline-primary"
+                                                    className="btn btn-sm btn-primary"
                                                     onClick={() => ackMutation.mutate(b.breach_id)}
                                                 >
                                                     Acknowledge
