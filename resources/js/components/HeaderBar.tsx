@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchMe } from '../lib/api'
-import { logout } from '../lib/auth'
+import { logout } from '../lib/authApi'
 
 export default function HeaderBar(){
   const { data } = useQuery({ queryKey:['me'], queryFn: fetchMe })
@@ -9,7 +9,7 @@ export default function HeaderBar(){
       <div style={{fontWeight:700}}>IRM</div>
       <div style={{display:'flex', gap:12, alignItems:'center'}}>
         <span>Welcome{data?.name ? `, ${data.name}` : ''}</span>
-        <button onClick={()=>logout('/')}>Logout</button>
+        <button onClick={()=>{logout(); window.location.href = "/";}}>Logout</button>
       </div>
     </header>
   )
