@@ -5,13 +5,20 @@
     "description": "The skeleton application for the Laravel framework.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/inrm-workflow-automation-blade"
+        }
+    ],
     "require": {
         "php": "^8.2",
         "dompdf/dompdf": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.10.1",
-        "phpoffice/phpspreadsheet": "^5.1"
+        "phpoffice/phpspreadsheet": "^5.1",
+        "inrm/workflow-automation-blade": "dev-main"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

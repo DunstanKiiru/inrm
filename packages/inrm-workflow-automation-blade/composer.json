@@ -1,0 +1,22 @@
+{
+  "name": "inrm/workflow-automation-blade",
+  "description": "Workflow Automation for INRM (Blade) \u2014 schedulers, event-driven triggers, actions, audit logs",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Inrm\\Workflow\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Inrm\\Workflow\\WorkflowServiceProvider"
+      ]
+    }
+  },
+  "require": {
+    "php": ">=8.1",
+    "illuminate/support": "^10.0|^11.0|^12.0"
+  }
+}
