@@ -21,6 +21,11 @@ Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::get('/reports/boardpack/preview', [ReportController::class, 'boardpackPreview'])
     ->name('boardpack.preview');
 
+// ===== Workflow React =====
+Route::get('/workflow', function () {
+    return view('workflow');
+});
+
 // ===== SPA Catch-all =====
 // Handles everything except /api/*
 Route::get('/{any}', function () {
