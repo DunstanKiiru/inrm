@@ -41,159 +41,106 @@ export default function DashboardBreachesCard() {
     });
 
     return (
-        <div
-            style={{
-                border: "1px solid #eee",
-                borderRadius: 12,
-                padding: 12,
-                background: "white",
-            }}
-        >
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: 8,
-                }}
-            >
-                <h3 style={{ margin: 0 }}>Active KRI Breaches</h3>
-                <label style={{ fontSize: 12 }}>
-                    Level:
+        <div className="dashboard-card">
+            <div className="card-header breaches-header">
+                <h5 className="card-title mb-0">
+                    <i className="fas fa-exclamation-triangle me-2 text-warning"></i>
+                    Active KRI Breaches
+                </h5>
+                <div>
+                    <label className="form-label small mb-0 me-2">Level:</label>
                     <select
+                        className="form-select form-select-sm"
                         value={level}
                         onChange={(e) => setLevel(e.target.value)}
-                        style={{ marginLeft: 6 }}
                     >
                         <option value="">All</option>
                         <option value="alert">Alert</option>
                         <option value="warn">Warn</option>
                     </select>
-                </label>
+                </div>
             </div>
 
             {!breachesQuery.data?.length ? (
-                <p style={{ opacity: 0.7 }}>No active breaches.</p>
+                <div className="card-body">
+                    <p className="text-muted mb-0">No active breaches.</p>
+                </div>
             ) : (
-                <div style={{ overflowX: "auto" }}>
-                    <table
-                        style={{
-                            width: "100%",
-                            borderCollapse: "collapse",
-                            marginTop: 6,
-                        }}
-                    >
-                        <thead>
-                            <tr>
-                                <th>When</th>
-                                <th>Level</th>
-                                <th>KRI</th>
-                                <th>Entity</th>
-                                <th>Reading</th>
-                                <th>Trend</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {breachesQuery.data.map((b) => {
-                                const series =
-                                    batchQuery.data && batchQuery.data[b.kri_id]
-                                        ? (
-                                              batchQuery.data[b.kri_id] as any
-                                          ).map((r: any) => Number(r.value))
-                                        : [];
+                <div className="card-body p-0">
+                    <div className="table-responsive">
+                        <table className="table table-hover table-sm breaches-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th className="fw-bold">When</th>
+                                    <th className="fw-bold">Level</th>
+                                    <th className="fw-bold">KRI</th>
+                                    <th className="fw-bold">Entity</th>
+                                    <th className="fw-bold">Reading</th>
+                                    <th className="fw-bold">Trend</th>
+                                    <th className="fw-bold text-end"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {breachesQuery.data.map((b) => {
+                                    const series =
+                                        batchQuery.data && batchQuery.data[b.kri_id]
+                                            ? (
+                                                  batchQuery.data[b.kri_id] as any
+                                              ).map((r: any) => Number(r.value))
+                                            : [];
 
-                                return (
-                                    <tr
-                                        key={b.breach_id}
-                                        style={{ borderTop: "1px solid #eee" }}
-                                    >
-                                        <td
-                                            style={{
-                                                fontSize: 12,
-                                                color: "#555",
-                                            }}
-                                        >
-                                            {new Date(
-                                                b.created_at
-                                            ).toLocaleString()}
-                                        </td>
-                                        <td style={{ fontWeight: 700 }}>
-                                            {b.level.toUpperCase()}
-                                        </td>
-                                        <td>
-                                            <Link
-                                                to={`/kris/${b.kri_id}`}
-                                                style={{
-                                                    textDecoration: "none",
-                                                }}
-                                            >
-                                                {b.kri_title}
-                                            </Link>
-                                        </td>
-                                        <td
-                                            style={{
-                                                fontSize: 12,
-                                                color: "#555",
-                                            }}
-                                        >
-                                            {b.entity_type} #{b.entity_id}
-                                        </td>
-                                        <td
-                                            style={{
-                                                fontSize: 12,
-                                                color: "#555",
-                                            }}
-                                        >
-                                            {b.reading_value ?? "-"}{" "}
-                                            {b.unit || ""}
-                                        </td>
-                                        <td>
-                                            {series.length ? (
-                                                <MiniSpark
-                                                    points={series}
-                                                    level={b.level}
-                                                    warnThreshold={
-                                                        b.warn_threshold ??
-                                                        undefined
-                                                    }
-                                                    alertThreshold={
-                                                        b.alert_threshold ??
-                                                        undefined
-                                                    }
-                                                    target={
-                                                        b.target ?? undefined
-                                                    }
-                                                    direction={
-                                                        b.direction as any
-                                                    }
-                                                />
-                                            ) : (
-                                                <span style={{ opacity: 0.6 }}>
-                                                    -
+                                    return (
+                                        <tr key={b.breach_id}>
+                                            <td className="small text-muted">
+                                                {new Date(b.created_at).toLocaleString()}
+                                            </td>
+                                            <td>
+                                                <span className={`badge breach-level ${b.level === 'alert' ? 'badge-danger' : 'badge-warning'}`}>
+                                                    {b.level.toUpperCase()}
                                                 </span>
-                                            )}
-                                        </td>
-                                        <td style={{ textAlign: "right" }}>
-                                            <button
-                                                style={{
-                                                    padding: "2px 6px",
-                                                    fontSize: 12,
-                                                }}
-                                                onClick={() =>
-                                                    ackMutation.mutate(
-                                                        b.breach_id
-                                                    )
-                                                }
-                                            >
-                                                Acknowledge
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                            </td>
+                                            <td>
+                                                <Link
+                                                    to={`/kris/${b.kri_id}`}
+                                                    className="text-decoration-none fw-medium"
+                                                >
+                                                    {b.kri_title}
+                                                </Link>
+                                            </td>
+                                            <td className="small text-muted">
+                                                {b.entity_type} #{b.entity_id}
+                                            </td>
+                                            <td className="small text-muted">
+                                                {b.reading_value ?? "-"} {b.unit || ""}
+                                            </td>
+                                            <td>
+                                                {series.length ? (
+                                                    <MiniSpark
+                                                        points={series}
+                                                        level={b.level}
+                                                        warnThreshold={b.warn_threshold ?? undefined}
+                                                        alertThreshold={b.alert_threshold ?? undefined}
+                                                        target={b.target ?? undefined}
+                                                        direction={b.direction as any}
+                                                    />
+                                                ) : (
+                                                    <span className="text-muted">-</span>
+                                                )}
+                                            </td>
+                                            <td className="text-end">
+                                                <button
+                                                    className="btn btn-sm btn-outline-primary"
+                                                    onClick={() => ackMutation.mutate(b.breach_id)}
+                                                >
+                                                    Acknowledge
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>

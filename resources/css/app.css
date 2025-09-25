@@ -508,47 +508,94 @@ body {
   background-color: var(--inrm-primary);
 }
 
-
-@media (max-width: 768px) {
-  .card {
-    margin-bottom: 1rem;
-  }
-
-  .btn {
-    width: 100%;
-    margin-bottom: 0.5rem;
-  }
-
-  .navbar-nav {
-    text-align: center;
-  }
-
-  .card-body {
-    padding: 1rem !important;
-  }
-
-  .display-4 {
-    font-size: calc(1.425rem + 2.1vw);
-  }
-
-  .btn-lg {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-  }
-
-  .form-control {
-    font-size: 16px;
-  }
-
-  .table-responsive {
-    font-size: 0.875rem;
-  }
-
-  .table th,
-  .table td {
-    padding: 0.5rem;
-  }
+/* Dashboard Specific Styles */
+.app-layout {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 220px 1fr;
+  height: 100vh;
 }
+
+.app-layout .header {
+  grid-row: 1;
+  grid-column: 1 / -1;
+}
+
+.app-layout .sidebar-dashboard {
+  grid-row: 2;
+  grid-column: 1;
+}
+
+.app-layout .dashboard-wrapper {
+  grid-row: 2;
+  grid-column: 2;
+}
+
+.content-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+}
+
+.dashboard-wrapper {
+  background: var(--inrm-bg-secondary);
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+.sidebar-dashboard {
+  background: linear-gradient(135deg, #008000 0%, #006400 100%);
+  color: white;
+  padding: 1rem;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.sidebar-dashboard .nav-link {
+  color: white !important;
+  margin-bottom: 0.5rem;
+  border-radius: var(--inrm-radius);
+  transition: var(--inrm-transition);
+}
+
+.sidebar-dashboard .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+}
+
+.sidebar-dashboard .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: var(--inrm-shadow-sm);
+}
+
+.sidebar-dashboard .dropdown-menu {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: var(--inrm-radius);
+  backdrop-filter: blur(10px);
+}
+
+.sidebar-dashboard .dropdown-item {
+  color: white;
+  padding: 0.5rem 1rem;
+  transition: var(--inrm-transition);
+}
+
+.sidebar-dashboard .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.dashboard-card {
+  margin-bottom: 1.5rem;
+  box-shadow: var(--inrm-shadow-md);
+  border: none;
+  border-radius: var(--inrm-radius-lg);
+  overflow: hidden;
+  transition: var(--inrm-transition);
+}
+
+.dashboard-card:hover {
+  box-shadow: var(--inrm-shadow-lg);
 
 @media (max-width: 576px) {
   .container-fluid {
@@ -584,4 +631,5 @@ body {
   .text-primary {
     color: var(--inrm-primary) !important;
   }
+}
 }

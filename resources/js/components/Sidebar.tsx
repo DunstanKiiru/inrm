@@ -38,7 +38,7 @@ function Sidebar() {
     }
 
     return (
-        <div className="sidebar text-white p-3" style={{ height: '100vh', overflowY: 'auto', backgroundColor: '#008000' }}>
+        <div className="sidebar-dashboard p-3">
             <h5 className="mb-4">
                 <i className="fas fa-shield-alt me-2"></i>
                 INRM System
@@ -58,11 +58,13 @@ function Sidebar() {
                 </li>
                 <li className="nav-item mb-2">
                     <Link className={`nav-link text-white ${location.pathname.startsWith("/assessments") ? "active" : ""}`} to="/assessments">
+                        <i className="fas fa-tasks me-1"></i>
                         Assessments
                     </Link>
                 </li>
                 <li className="nav-item mb-2">
                     <Link className={`nav-link text-white ${location.pathname.startsWith("/kris") ? "active" : ""}`} to="/kris">
+                        <i className="fas fa-chart-bar me-1"></i>
                         KRIs
                     </Link>
                 </li>
@@ -70,7 +72,7 @@ function Sidebar() {
                     <a className="nav-link text-white dropdown-toggle" href="#" id="controlsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Controls
                     </a>
-                    <ul className="dropdown-menu" style={{backgroundColor: '#008000'}} aria-labelledby="controlsDropdown">
+                    <ul className="dropdown-menu" aria-labelledby="controlsDropdown">
                         <li><Link className="dropdown-item text-white" to="/controls">Controls</Link></li>
                         <li><Link className="dropdown-item text-white" to="/controls/testing">Testing Queue</Link></li>
                         <li><Link className="dropdown-item text-white" to="/controls/analytics">Control Effectiveness</Link></li>
@@ -78,21 +80,25 @@ function Sidebar() {
                 </li>
                 <li className="nav-item mb-2">
                     <Link className={`nav-link text-white ${location.pathname.startsWith("/frameworks") ? "active" : ""}`} to="/frameworks">
+                        <i className="fas fa-th-large me-1"></i>
                         Frameworks
                     </Link>
                 </li>
                 <li className="nav-item mb-2">
                     <Link className={`nav-link text-white ${location.pathname.startsWith("/obligations") ? "active" : ""}`} to="/obligations">
+                        <i className="fas fa-file-contract me-1"></i>
                         Obligations
                     </Link>
                 </li>
                 <li className="nav-item mb-2">
                     <Link className={`nav-link text-white ${location.pathname.startsWith("/policies") ? "active" : ""}`} to="/policies">
+                        <i className="fas fa-file-alt me-1"></i>
                         Policies
                     </Link>
                 </li>
                 <li className="nav-item mb-2">
                     <Link className={`nav-link text-white ${location.pathname.startsWith("/my-attestations") ? "active" : ""}`} to="/my-attestations">
+                        <i className="fas fa-check-circle me-1"></i>
                         My Attestations
                     </Link>
                 </li>
