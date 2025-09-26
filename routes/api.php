@@ -42,6 +42,7 @@ use App\Http\Controllers\API\ControlAnalyticsController;
 use App\Http\Controllers\API\MeController;
 use App\Http\Controllers\Api\RulesController;
 use App\Http\Controllers\Api\RulesRunController;
+use App\Http\Controllers\Api\SuppressionsController;
 
 // ----------------------
 // CORS preflight
@@ -120,6 +121,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Run evaluation now (optionally filter vendor_id)
         Route::post('rules/run', [RulesRunController::class, 'run']);
+
+        // Suppressions
+        Route::get('rules/suppressions', [SuppressionsController::class, 'index']);
+        Route::post('rules/suppressions', [SuppressionsController::class, 'store']);
+        Route::delete('rules/suppressions/{id}', [SuppressionsController::class, 'destroy']);
     });
 
     // ----------------------
