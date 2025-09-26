@@ -3,18 +3,14 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// ----------------------
-// INRM TPR Controllers
-// ----------------------
+
 use App\Http\Controllers\Api\VendorsController as TprVendorsController;
 use App\Http\Controllers\Api\KriController as TprKriController;
 use App\Http\Controllers\Api\SlaController as TprSlaController;
 use App\Http\Controllers\Api\ImportsController as TprImportsController;
 use App\Http\Controllers\Api\PortfolioController as TprPortfolioController;
 
-// ----------------------
-// Core API Controllers
-// ----------------------
+
 use App\Http\Controllers\API\RiskCategoryController;
 use App\Http\Controllers\API\RiskCauseController;
 use App\Http\Controllers\API\RiskConsequenceController;
@@ -44,6 +40,8 @@ use App\Http\Controllers\API\ControlTestExecutionController;
 use App\Http\Controllers\API\ControlIssueController;
 use App\Http\Controllers\API\ControlAnalyticsController;
 use App\Http\Controllers\API\MeController;
+use App\Http\Controllers\Api\RulesController;
+use App\Http\Controllers\Api\RulesRunController;
 
 // ----------------------
 // CORS preflight
@@ -112,6 +110,16 @@ Route::middleware('auth:sanctum')->group(function () {
         // Portfolio
         Route::get('portfolio/overview', [TprPortfolioController::class, 'overview']);
         Route::get('portfolio/top', [TprPortfolioController::class, 'top']);
+
+        // Rules
+        Route::get('rules', [RulesController::class, 'index']);
+        Route::post('rules', [RulesController::class, 'store']);
+        Route::put('rules/{id}', [RulesController::class, 'update']);
+        Route::delete('rules/{id}', [RulesController::class, 'destroy']);
+        Route::get('rules/audit', [RulesController::class, 'audit']);
+
+        // Run evaluation now (optionally filter vendor_id)
+        Route::post('rules/run', [RulesRunController::class, 'run']);
     });
 
     // ----------------------
