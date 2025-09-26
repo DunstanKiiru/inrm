@@ -1,24 +1,34 @@
 <?php
+
 namespace Inrm\TPR;
+
 use Illuminate\Support\ServiceProvider;
 
 class TPRServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/inrm_tpr.php', 'inrm_tpr');
+        // Merge default package config
+        $this->mergeConfigFrom(__DIR__ . '/../config/inrm_tpr.php', 'inrm_tpr');
     }
+
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
+        // Load package resources
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
+
         if ($this->app->runningInConsole()) {
+            // Register console commands
             $this->commands([
+                \App\Console\TprRulesEvaluate::class,
                 \App\Console\TprKriImportDaily::class,
-                \App\Console\TprAssessmentsOverdue::class
+                \App\Console\TprAssessmentsOverdue::class,
             ]);
+
+            // Publish config file
             $this->publishes([
-                __DIR__.'/../config/inrm_tpr.php' => config_path('inrm_tpr.php'),
+                __DIR__ . '/../config/inrm_tpr.php' => config_path('inrm_tpr.php'),
             ], 'config');
         }
     }
