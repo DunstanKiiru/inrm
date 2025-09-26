@@ -12,13 +12,13 @@ use Illuminate\Http\Request;
 class TprRulesEvaluate extends Command
 {
     protected $signature = 'inrm:tpr-rules-evaluate {--vendor_id=} {--via-controller}';
-    protected $description = 'Evaluate TPR rules (cool-off, composite, suppressions) and create/close Issues or RIM events with audit.';
+    protected $description = 'Evaluate TPR rules (strategies, cool-off, composite, suppressions, auto-reopen, chains) and create/close Issues or RIM events with audit.';
 
     public function handle(): int
     {
         $vendorId = $this->option('vendor_id');
 
-        // If --via-controller flag is passed, delegate to REST controller
+        // Option 1: delegate to REST controller
         if ($this->option('via-controller')) {
             $controller = App::make(RulesRunController::class);
             $req = Request::create('/api/tpr/rules/run', 'POST', array_filter(['vendor_id' => $vendorId]));
@@ -27,7 +27,7 @@ class TprRulesEvaluate extends Command
             return 0;
         }
 
-        // Otherwise, run inline evaluation logic
+        // Option 2: run inline evaluation logic
         $now = now();
         $rules = DB::table('tpr_rules')->where('enabled', 1)->orderBy('id')->get()->all();
         $evaluated = 0; $triggers = 0; $issues = 0; $audits = 0; $skipped = 0;
