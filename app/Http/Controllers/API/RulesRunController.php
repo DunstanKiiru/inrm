@@ -21,17 +21,19 @@ class RulesRunController extends Controller
             ->all();
 
         $summary = [
-            'evaluated'     => count($rules),
-            'triggers'      => 0,
-            'issues'        => 0,
-            'audits'        => 0,
-            'skipped'       => 0,
-            'suppressed'    => 0,
-            'autoclosed'    => 0,
-            'reopened'      => 0,
-            'cooloff_skips' => 0,
-            'cooloff_logs'  => 0,
-            'once_skips'    => 0,
+            'evaluated'             => count($rules),
+            'triggers'              => 0,
+            'issues'                => 0,
+            'audits'                => 0,
+            'skipped'               => 0,
+            'suppressed'            => 0,
+            'autoclosed'            => 0,
+            'reopened'              => 0,
+            'escalations'           => 0,
+            'cooloff_skips'         => 0,
+            'cooloff_logs'          => 0,
+            'once_skips'            => 0,
+            'reopen_cooldown_skips' => 0,
         ];
 
         // --- Load suppressions ---
@@ -70,13 +72,11 @@ class RulesRunController extends Controller
                 }
 
                 $winStart = $now->clone()->subDays((int)$rule->window_days)->toDateString();
-                $winEnd   = $now->toDateString();
 
                 // --- Composite rule evaluation ---
                 if (($rule->logic_type ?? 'SIMPLE') === 'COMPOSITE' && $rule->expression) {
-                    $passed = $this->evalComposite($v->id, $rule, $winStart);
-                    if ($passed) {
-                        $this->processTrigger($rule, $v, 'composite', 'COMPOSITE', 1, $winStart, $winEnd, $summary);
+                    if ($this->evalComposite($v->id, $rule, $winStart)) {
+                        $this->processTrigger($rule, $v, 'composite', 'COMPOSITE', 1, $winStart, $now->toDateString(), $summary);
                     }
                     $this->autoCloseIfCleared($rule, $v, 'composite', 'COMPOSITE', $winStart, $summary);
                     continue;
@@ -86,15 +86,10 @@ class RulesRunController extends Controller
                 $pairs = [];
 
                 if ($rule->type === 'KRI_ALERTS_IN_WINDOW' || $rule->metric === 'kri') {
-                    $rows = DB::table('tpr_vendor_kri_measures')
-                        ->where('vendor_id', $v->id)
-                        ->where('measured_at', '>=', $winStart)
-                        ->whereIn('status', ['alert','breach'])
-                        ->when($rule->code_pattern, fn($q) => $q->where('kri_code','REGEXP',$rule->code_pattern))
-                        ->select('kri_code as code', DB::raw('COUNT(*) as n'))
-                        ->groupBy('kri_code')
-                        ->get()->all();
-
+                    $rows = DB::table('tpr_vendor_kri_measures')->where('vendor_id',$v->id)
+                        ->where('measured_at','>=',$winStart)->whereIn('status',['alert','breach'])
+                        ->when($rule->code_pattern, fn($q)=>$q->where('kri_code','REGEXP',$rule->code_pattern))
+                        ->select('kri_code as code', DB::raw('COUNT(*) as n'))->groupBy('kri_code')->get()->all();
                     foreach ($rows as $row) {
                         if ((int)$row->n >= (int)$rule->threshold) {
                             $pairs[] = ['metric'=>'kri','code'=>$row->code,'count'=>(int)$row->n];
@@ -103,15 +98,10 @@ class RulesRunController extends Controller
                 }
 
                 if ($rule->type === 'SLA_BREACHES_IN_WINDOW' || $rule->metric === 'sla') {
-                    $rows = DB::table('tpr_vendor_sla_measures')
-                        ->where('vendor_id', $v->id)
-                        ->where('measured_at','>=',$winStart)
-                        ->where('status','breach')
-                        ->when($rule->code_pattern, fn($q) => $q->where('sla_code','REGEXP',$rule->code_pattern))
-                        ->select('sla_code as code', DB::raw('COUNT(*) as n'))
-                        ->groupBy('sla_code')
-                        ->get()->all();
-
+                    $rows = DB::table('tpr_vendor_sla_measures')->where('vendor_id',$v->id)
+                        ->where('measured_at','>=',$winStart)->where('status','breach')
+                        ->when($rule->code_pattern, fn($q)=>$q->where('sla_code','REGEXP',$rule->code_pattern))
+                        ->select('sla_code as code', DB::raw('COUNT(*) as n'))->groupBy('sla_code')->get()->all();
                     foreach ($rows as $row) {
                         if ((int)$row->n >= (int)$rule->threshold) {
                             $pairs[] = ['metric'=>'sla','code'=>$row->code,'count'=>(int)$row->n];
@@ -120,9 +110,8 @@ class RulesRunController extends Controller
                 }
 
                 foreach ($pairs as $p) {
-                    $this->processTrigger($rule, $v, $p['metric'], $p['code'], $p['count'], $winStart, $winEnd, $summary);
+                    $this->processTrigger($rule, $v, $p['metric'], $p['code'], (int)$p['count'], $winStart, $now->toDateString(), $summary);
                 }
-
                 foreach ($pairs as $p) {
                     $this->autoCloseIfCleared($rule, $v, $p['metric'], $p['code'], $winStart, $summary);
                 }
@@ -132,213 +121,161 @@ class RulesRunController extends Controller
         return $summary;
     }
 
-    // --- Process trigger with strategies (merged from advanced version) ---
-    protected function processTrigger($rule, $v, string $metric, string $code, int $count, string $winStart, string $winEnd, array &$summary): void
+    protected function processTrigger($rule, $v, string $metric, string $code, int $count, string $winStart, string $winEnd, array &$summary)
     {
-        $summary['triggers']++;
+        $now = now();
 
-        $strategy     = $rule->cool_off_strategy ?? 'create_new';
-        $cooloffDays  = (int)($rule->cool_off_days ?? 14);
-        $autoReopen   = (bool)($rule->auto_reopen ?? true);
+        // last audit for cooldown / once-off checks
+        $lastAudit = DB::table('tpr_rule_audit')
+            ->where('rule_id',$rule->id)->where('vendor_id',$v->id)
+            ->where('metric',$metric)->where('matched_code',$code)
+            ->orderByDesc('triggered_at')->first();
 
-        $chain = DB::table('tpr_rule_chains')
-            ->where([
-                'rule_id'=>$rule->id,
-                'vendor_id'=>$v->id,
-                'metric'=>$metric,
-                'matched_code'=>$code,
-            ])
-            ->first();
-
-        // Strategy: log_only
-        if ($strategy === 'log_only') {
-            $this->audit($rule, $v, $metric, $code, $count, 'cooloff_log', null, $chain->id ?? null, $winStart, $winEnd);
-            $summary['cooloff_logs']++;
+        // once strategy
+        if (($rule->cool_off_strategy ?? '') === 'once' && $lastAudit) {
+            $summary['once_skips']++;
+            $this->audit($rule, $v, $metric, $code, $count, 'skip_once', null, null);
             return;
         }
 
-        // Strategy: escalate_once
-        if ($strategy === 'escalate_once') {
-            if ($chain && $chain->issue_id) {
-                if ($autoReopen && $this->isIssueClosed($chain->issue_id)) {
-                    $this->reopenIssue($chain->issue_id);
-                    DB::table('tpr_rule_chains')->where('id',$chain->id)->update(['status'=>'open','opened_at'=>now(),'closed_at'=>null,'updated_at'=>now()]);
-                    $this->audit($rule, $v, $metric, $code, $count, 'reopen_issue', $chain->issue_id, $chain->id, $winStart, $winEnd);
-                    $summary['reopened']++;
-                    return;
+        // cooldown
+        if ($lastAudit && $rule->cool_off_days && $lastAudit->triggered_at >= $now->clone()->subDays($rule->cool_off_days)) {
+            $summary['cooloff_skips']++;
+            $this->audit($rule, $v, $metric, $code, $count, 'skip_cooloff', null, null);
+            return;
+        }
+
+        // escalation
+        $levels = json_decode($rule->escalation_levels ?? '[]', true);
+        $chainId = null;
+        if ($levels) {
+            $triggers = DB::table('tpr_rule_audit')->where('rule_id',$rule->id)->where('vendor_id',$v->id)
+                ->where('metric',$metric)->where('matched_code',$code)
+                ->where('triggered_at','>=',$now->clone()->subDays($rule->window_days))->count();
+            foreach ($levels as $lvl=>$need) {
+                if ($triggers >= $need) {
+                    $summary['escalations']++;
+                    $this->audit($rule,$v,$metric,$code,$count,'escalated',$lastAudit->issue_id??null,$lastAudit->chain_id??null);
                 }
-                $this->audit($rule, $v, $metric, $code, $count, 'once_skip', $chain->issue_id, $chain->id, $winStart, $winEnd);
-                $summary['once_skips']++;
-                return;
             }
         }
 
-        // --- Default (create_new, reopen_existing, etc.) ---
-        $recent = DB::table('tpr_rule_audit')
-            ->where('rule_id',$rule->id)
-            ->where('vendor_id',$v->id)
-            ->where('matched_code',$code)
-            ->where('action_taken','created_issue')
-            ->where('triggered_at','>=', now()->subDays($cooloffDays)->toDateTimeString())
-            ->exists();
-
-        if ($recent) {
-            $this->audit($rule, $v, $metric, $code, $count, 'cooloff_skip', $chain->issue_id ?? null, $chain->id ?? null, $winStart, $winEnd);
-            $summary['cooloff_skips']++;
-            return;
-        }
-
-        $issueId = $this->maybeCreateIssue($rule, $v, $metric, $code, $count);
-        $chainId = $chain->id ?? DB::table('tpr_rule_chains')->insertGetId([
-            'rule_id'=>$rule->id,
-            'vendor_id'=>$v->id,
-            'vendor_code'=>$v->code,
-            'metric'=>$metric,
-            'matched_code'=>$code,
-            'issue_id'=>$issueId,
-            'status'=>'open',
-            'opened_at'=>now(),
-            'created_at'=>now(),
-            'updated_at'=>now(),
-        ]);
-
-        if ($chain && !$chain->issue_id && $issueId) {
-            DB::table('tpr_rule_chains')->where('id',$chainId)->update(['issue_id'=>$issueId,'status'=>'open','opened_at'=>now(),'updated_at'=>now()]);
-        }
-
-        $this->audit($rule, $v, $metric, $code, $count, $issueId ? 'created_issue' : 'rim_event', $issueId, $chainId, $winStart, $winEnd);
+        // maybe create issue
+        $issueId = $this->maybeCreateIssue($rule,$v,$metric,$code,$count);
         if ($issueId) $summary['issues']++;
+
+        // audit log
+        $this->audit($rule,$v,$metric,$code,$count,'triggered',$issueId,$chainId);
+        $summary['triggers']++;
     }
 
-    // --- Create issue if allowed ---
     protected function maybeCreateIssue($rule, $v, string $metric, string $code, int $count): ?int
     {
-        if ($rule->action === 'rim_event_only' || !Schema::hasTable('issues')) return null;
+        if (($rule->action ?? 'create_issue') !== 'create_issue') return null;
 
-        $title = $this->renderTpl($rule->title_template ?? '[TPR] {{metric}} threshold for {{vendor_code}}', [
-            'metric'=>$metric,'vendor_code'=>$v->code,'vendor_name'=>$v->name,'matched_code'=>$code,'count'=>$count,
-            'window_days'=>$rule->window_days,'rule_id'=>$rule->id
-        ]);
+        $now = now();
 
-        $desc = $this->renderTpl($rule->description_template ?? 'Rule {{rule_id}} triggered for {{vendor_code}}: {{count}} in {{window_days}} days ({{metric}}={{matched_code}}).', [
-            'metric'=>$metric,'vendor_code'=>$v->code,'vendor_name'=>$v->name,'matched_code'=>$code,'count'=>$count,
-            'window_days'=>$rule->window_days,'rule_id'=>$rule->id
-        ]);
+        $openIssue = DB::table('tpr_issues')
+            ->where('vendor_id',$v->id)->where('rule_id',$rule->id)
+            ->where('metric',$metric)->where('matched_code',$code)
+            ->whereNull('closed_at')->first();
 
-        return DB::table('issues')->insertGetId([
-            'title'=> $title,
-            'description'=> $desc,
-            'priority'=> $rule->issue_priority ?? 'high',
-            'status'=>'open',
-            'created_at'=> now(),
-            'updated_at'=> now(),
+        if ($openIssue) {
+            if ($rule->auto_reopen && $this->isIssueClosed($openIssue->id)) {
+                if ($rule->reopen_cooldown_hours) {
+                    $lastAudit = DB::table('tpr_rule_audit')->where('issue_id',$openIssue->id)
+                        ->orderByDesc('triggered_at')->first();
+                    if ($lastAudit && $lastAudit->triggered_at >= $now->clone()->subHours($rule->reopen_cooldown_hours)) {
+                        return null; // skip reopen
+                    }
+                }
+                $this->reopenIssue($openIssue->id);
+                return $openIssue->id;
+            }
+            return $openIssue->id;
+        }
+
+        $id = DB::table('tpr_issues')->insertGetId([
+            'vendor_id'=>$v->id,'rule_id'=>$rule->id,'metric'=>$metric,'matched_code'=>$code,
+            'status'=>'open','priority'=>$rule->issue_priority ?? 'high',
+            'title'=>$this->renderTpl($rule->title_template ?? '[TPR] {{metric}} threshold for {{vendor_code}}',
+                ['vendor_code'=>$v->code,'vendor_name'=>$v->name,'rule_id'=>$rule->id,'metric'=>$metric,'matched_code'=>$code,'count'=>$count,'window_days'=>$rule->window_days]),
+            'description'=>$this->renderTpl($rule->description_template ??
+                'Rule {{rule_id}} triggered for {{vendor_code}}: {{count}} in {{window_days}} days ({{metric}}={{matched_code}}).',
+                ['vendor_code'=>$v->code,'vendor_name'=>$v->name,'rule_id'=>$rule->id,'metric'=>$metric,'matched_code'=>$code,'count'=>$count,'window_days'=>$rule->window_days]),
+            'created_at'=>$now,'updated_at'=>$now
         ]);
+        return $id;
     }
 
     protected function isIssueClosed(int $issueId): bool
     {
-        if (!Schema::hasTable('issues')) return false;
-        $row = DB::table('issues')->select('status')->where('id',$issueId)->first();
-        return $row ? ($row->status !== 'open') : false;
+        $row = DB::table('tpr_issues')->where('id',$issueId)->first();
+        return $row && $row->status === 'closed';
     }
 
     protected function reopenIssue(int $issueId): void
     {
-        if (!Schema::hasTable('issues')) return;
-        DB::table('issues')->where('id',$issueId)->update(['status'=>'open','updated_at'=>now()]);
+        DB::table('tpr_issues')->where('id',$issueId)->update([
+            'status'=>'open','closed_at'=>null,'updated_at'=>now()
+        ]);
     }
 
     protected function autoCloseIfCleared($rule, $v, string $metric, string $code, string $since, array &$summary): void
     {
-        $acDays = (int)($rule->auto_close_days ?? 0);
-        if ($acDays <= 0 || !Schema::hasTable('issues')) return;
+        if (!$rule->auto_close_days) return;
+        $thresholdDate = now()->subDays($rule->auto_close_days);
 
-        $checkSince = now()->subDays($acDays)->toDateString();
+        $openIssues = DB::table('tpr_issues')->where('vendor_id',$v->id)
+            ->where('rule_id',$rule->id)->where('metric',$metric)->where('matched_code',$code)
+            ->where('status','open')->get()->all();
 
-        $chain = DB::table('tpr_rule_chains')->where([
-            'rule_id'=>$rule->id,'vendor_id'=>$v->id,'metric'=>$metric,'matched_code'=>$code
-        ])->first();
-        if (!$chain || !$chain->issue_id) return;
-
-        $close = false;
-        if ($metric === 'kri') {
-            $cnt = DB::table('tpr_vendor_kri_measures')
-                ->where('vendor_id',$v->id)
-                ->where('measured_at','>=',$checkSince)
-                ->whereIn('status',['alert','breach'])
-                ->where('kri_code',$code)->count();
-            $close = $cnt < (int)$rule->threshold;
-        } elseif ($metric === 'sla') {
-            $cnt = DB::table('tpr_vendor_sla_measures')
-                ->where('vendor_id',$v->id)
-                ->where('measured_at','>=',$checkSince)
-                ->where('status','breach')
-                ->where('sla_code',$code)->count();
-            $close = $cnt < (int)$rule->threshold;
-        } elseif ($metric === 'composite') {
-            $quiet = !$this->evalComposite($v->id, $rule, $checkSince);
-            $close = $quiet;
-        }
-
-        if ($close) {
-            DB::table('issues')->where('id',$chain->issue_id)->update(['status'=>'closed','updated_at'=>now()]);
-            DB::table('tpr_rule_chains')->where('id',$chain->id)->update(['status'=>'closed','closed_at'=>now(),'updated_at'=>now()]);
-            $this->audit($rule, $v, $metric, $code, 0, 'auto_close', $chain->issue_id, $chain->id, $checkSince, now()->toDateString());
-            $summary['autoclosed']++;
+        foreach ($openIssues as $issue) {
+            $lastTrig = DB::table('tpr_rule_audit')->where('issue_id',$issue->id)
+                ->orderByDesc('triggered_at')->first();
+            if (!$lastTrig || $lastTrig->triggered_at < $thresholdDate) {
+                DB::table('tpr_issues')->where('id',$issue->id)->update([
+                    'status'=>'closed','closed_at'=>now(),'updated_at'=>now()
+                ]);
+                $this->audit($rule,$v,$metric,$code,0,'auto_closed',$issue->id,null);
+                $summary['autoclosed']++;
+            }
         }
     }
 
-    protected function audit($rule, $v, ?string $metric, ?string $code, int $count, string $action, ?int $issueId, ?int $chainId, ?string $wStart=null, ?string $wEnd=null): void
+    protected function audit($rule, $v, ?string $metric, ?string $code, int $count, string $action, ?int $issueId, ?int $chainId): void
     {
         DB::table('tpr_rule_audit')->insert([
-            'rule_id'=>$rule->id,
-            'vendor_id'=>$v->id,'vendor_code'=>$v->code,
-            'metric'=>$metric,'matched_code'=>$code,'count'=>$count,
-            'window_start'=>$wStart ?? now()->subDays((int)$rule->window_days)->toDateString(),
-            'window_end'=>$wEnd ?? now()->toDateString(),
-            'action_taken'=>$action,'issue_id'=>$issueId,'chain_id'=>$chainId,
-            'payload'=> json_encode(['rule'=>$rule]),
-            'triggered_at'=> now(),'created_at'=> now(),'updated_at'=> now()
+            'rule_id'=>$rule->id,'vendor_id'=>$v->id,'metric'=>$metric,'matched_code'=>$code,
+            'count'=>$count,'action'=>$action,'issue_id'=>$issueId,'chain_id'=>$chainId,
+            'triggered_at'=>now(),'created_at'=>now(),'updated_at'=>now()
         ]);
     }
 
     protected function renderTpl(string $tpl, array $ctx): string
     {
-        foreach ($ctx as $k=>$v) {
-            $tpl = preg_replace('/{{\s*'.preg_quote($k,'/').'\s*}}/u', (string)$v, $tpl);
-        }
-        return $tpl;
+        return preg_replace_callback('/{{(\w+)}}/', fn($m)=>$ctx[$m[1]]??$m[0], $tpl);
     }
 
     protected function evalComposite(int $vendorId, $rule, string $since): bool
     {
-        $expr = $rule->expression ?? '';
-        if ($expr === '') return false;
-        $threshold = (int)($rule->threshold ?? 1);
+        if (!$rule->expression) return false;
+        $expr = $rule->expression;
 
-        $expr = preg_replace_callback("/kri\(\s*'([^']+)'\s*(?:,\s*(\d+))?\s*\)/i", function($m) use ($vendorId,$since,$threshold) {
-            $pat = $m[1]; $th = isset($m[2]) ? (int)$m[2] : $threshold;
-            $q = DB::table('tpr_vendor_kri_measures')->where('vendor_id',$vendorId)
-                ->where('measured_at','>=',$since)->whereIn('status',['alert','breach'])
-                ->where('kri_code','REGEXP',$pat)->count();
-            return $q >= $th ? 'true' : 'false';
+        // Replace references like rule:123 with boolean of that rule triggered
+        $expr = preg_replace_callback('/rule:(\d+)/', function($m) use ($vendorId,$since){
+            $rid = (int)$m[1];
+            $cnt = DB::table('tpr_rule_audit')->where('rule_id',$rid)->where('vendor_id',$vendorId)
+                ->where('triggered_at','>=',$since)->count();
+            return $cnt>0 ? 'true' : 'false';
         }, $expr);
 
-        $expr = preg_replace_callback("/sla\(\s*'([^']+)'\s*(?:,\s*(\d+))?\s*\)/i", function($m) use ($vendorId,$since,$threshold) {
-            $pat = $m[1]; $th = isset($m[2]) ? (int)$m[2] : $threshold;
-            $q = DB::table('tpr_vendor_sla_measures')->where('vendor_id',$vendorId)
-                ->where('measured_at','>=',$since)->where('status','breach')
-                ->where('sla_code','REGEXP',$pat)->count();
-            return $q >= $th ? 'true' : 'false';
-        }, $expr);
-
-        $expr = preg_replace('/\bAND\b/i', '&&', $expr);
-        $expr = preg_replace('/\bOR\b/i', '||', $expr);
-        $expr = preg_replace('/\bNOT\b/i', '!', $expr);
-
-        if (preg_match('/[^\s\(\)\!\&\|truefals]/i', str_replace(['true','false'],'', strtolower($expr)))) {
+        // simple eval
+        $expr = str_ireplace(['AND','OR','NOT'],['&&','||','!'],$expr);
+        try {
+            return eval("return ($expr);");
+        } catch (\Throwable $e) {
             return false;
         }
-        try { return eval('return ('.$expr.');') ? true : false; } catch (\Throwable $e) { return false; }
     }
 }
