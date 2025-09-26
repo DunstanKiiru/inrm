@@ -6,13 +6,11 @@ use Illuminate\Support\Facades\Route;
 // ----------------------
 // INRM TPR Controllers
 // ----------------------
-use Inrm\TPR\Http\Controllers\Api\VendorsController as TprVendorsController;
-use Inrm\TPR\Http\Controllers\Api\AssessmentsController as TprAssessmentsController;
-use Inrm\TPR\Http\Controllers\Api\AssessmentTemplatesController as TprAssessmentTemplatesController;
-use Inrm\TPR\Http\Controllers\Api\KriController as TprKriController;
-use Inrm\TPR\Http\Controllers\Api\SlaController as TprSlaController;
-use Inrm\TPR\Http\Controllers\Api\ImportsController as TprImportsController;
-use Inrm\TPR\Http\Controllers\Api\PortfolioController as TprPortfolioController;
+use App\Http\Controllers\Api\VendorsController as TprVendorsController;
+use App\Http\Controllers\Api\KriController as TprKriController;
+use App\Http\Controllers\Api\SlaController as TprSlaController;
+use App\Http\Controllers\Api\ImportsController as TprImportsController;
+use App\Http\Controllers\Api\PortfolioController as TprPortfolioController;
 
 // ----------------------
 // Core API Controllers
@@ -89,15 +87,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('vendors/{id}/overview', [TprVendorsController::class, 'overview']);
 
         // Assessment templates & runs
-        Route::get('templates', [TprAssessmentTemplatesController::class, 'index']);
-        Route::post('templates', [TprAssessmentTemplatesController::class, 'store']);
-        Route::get('templates/{id}', [TprAssessmentTemplatesController::class, 'show']);
+        Route::get('templates', [AssessmentTemplateController::class, 'index']);
+        Route::post('templates', [AssessmentTemplateController::class, 'store']);
+        Route::get('templates/{id}', [AssessmentTemplateController::class, 'show']);
 
-        Route::get('vendors/{id}/assessments', [TprAssessmentsController::class, 'index']);
-        Route::post('vendors/{id}/assessments', [TprAssessmentsController::class, 'start']);
-        Route::get('assessments/{id}', [TprAssessmentsController::class, 'show']);
-        Route::post('assessments/{id}/responses', [TprAssessmentsController::class, 'submitResponses']);
-        Route::post('assessments/{id}/score', [TprAssessmentsController::class, 'score']);
+        Route::get('vendors/{id}/assessments', [AssessmentController::class, 'index']);
+        Route::post('vendors/{id}/assessments', [AssessmentController::class, 'start']);
+        Route::get('assessments/{id}', [AssessmentController::class, 'show']);
+        Route::post('assessments/{id}/responses', [AssessmentController::class, 'submitResponses']);
+        Route::post('assessments/{id}/score', [AssessmentController::class, 'score']);
 
         // KRIs
         Route::get('vendors/{id}/kri/defs', [TprKriController::class, 'defs']);
