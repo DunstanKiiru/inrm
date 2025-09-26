@@ -25,46 +25,52 @@ class RulesController extends Controller
     public function store(Request $r)
     {
         $data = $r->validate([
-            'type'                 => 'required|string',
-            'metric'               => 'nullable|string',
-            'code_pattern'         => 'nullable|string',
-            'window_days'          => 'nullable|integer',
-            'threshold'            => 'nullable|integer',
-            'cool_off_days'        => 'nullable|integer',
-            'auto_close_days'      => 'nullable|integer',
-            'cool_off_strategy'    => 'nullable|string',
-            'auto_reopen'          => 'nullable|boolean',
-            'scope'                => 'array',
-            'enabled'              => 'nullable|boolean',
-            'action'               => 'nullable|string',
-            'issue_priority'       => 'nullable|string',
-            'title_template'       => 'nullable|string',
-            'description_template' => 'nullable|string',
-            'logic_type'           => 'nullable|string',
-            'expression'           => 'nullable|string',
+            'type'                  => 'required|string',
+            'metric'                => 'nullable|string',
+            'code_pattern'          => 'nullable|string',
+            'window_days'           => 'nullable|integer',
+            'threshold'             => 'nullable|integer',
+            'cool_off_days'         => 'nullable|integer',
+            'auto_close_days'       => 'nullable|integer',
+            'cool_off_strategy'     => 'nullable|string',
+            'auto_reopen'           => 'nullable|boolean',
+            'reopen_cooldown_hours' => 'nullable|integer',
+            'escalation_levels'     => 'array',
+            'scope'                 => 'array',
+            'enabled'               => 'nullable|boolean',
+            'action'                => 'nullable|string',
+            'issue_priority'        => 'nullable|string',
+            'title_template'        => 'nullable|string',
+            'description_template'  => 'nullable|string',
+            'logic_type'            => 'nullable|string',
+            'expression'            => 'nullable|string',
         ]);
 
         $id = DB::table('tpr_rules')->insertGetId([
-            'type'                 => $data['type'],
-            'metric'               => $data['metric'] ?? null,
-            'code_pattern'         => $data['code_pattern'] ?? null,
-            'window_days'          => $data['window_days'] ?? 30,
-            'threshold'            => $data['threshold'] ?? 3,
-            'cool_off_days'        => $data['cool_off_days'] ?? 14,
-            'auto_close_days'      => $data['auto_close_days'] ?? 7,
-            'cool_off_strategy'    => $data['cool_off_strategy'] ?? 'create_new',
-            'auto_reopen'          => $data['auto_reopen'] ?? true,
-            'scope'                => json_encode($data['scope'] ?? null),
-            'enabled'              => $data['enabled'] ?? true,
-            'action'               => $data['action'] ?? 'create_issue',
-            'issue_priority'       => $data['issue_priority'] ?? 'high',
-            'title_template'       => $data['title_template'] ?? '[TPR] {{metric}} threshold for {{vendor_code}}',
-            'description_template' => $data['description_template']
+            'type'                  => $data['type'],
+            'metric'                => $data['metric'] ?? null,
+            'code_pattern'          => $data['code_pattern'] ?? null,
+            'window_days'           => $data['window_days'] ?? 30,
+            'threshold'             => $data['threshold'] ?? 3,
+            'cool_off_days'         => $data['cool_off_days'] ?? 14,
+            'auto_close_days'       => $data['auto_close_days'] ?? 7,
+            'cool_off_strategy'     => $data['cool_off_strategy'] ?? 'create_new',
+            'auto_reopen'           => $data['auto_reopen'] ?? true,
+            'reopen_cooldown_hours' => $data['reopen_cooldown_hours'] ?? 12,
+            'escalation_levels'     => array_key_exists('escalation_levels', $data)
+                ? json_encode($data['escalation_levels'])
+                : null,
+            'scope'                 => json_encode($data['scope'] ?? null),
+            'enabled'               => $data['enabled'] ?? true,
+            'action'                => $data['action'] ?? 'create_issue',
+            'issue_priority'        => $data['issue_priority'] ?? 'high',
+            'title_template'        => $data['title_template'] ?? '[TPR] {{metric}} threshold for {{vendor_code}}',
+            'description_template'  => $data['description_template']
                 ?? 'Rule {{rule_id}} triggered for {{vendor_code}}: {{count}} in {{window_days}} days ({{metric}}={{matched_code}}).',
-            'logic_type'           => $data['logic_type'] ?? 'SIMPLE',
-            'expression'           => $data['expression'] ?? null,
-            'created_at'           => now(),
-            'updated_at'           => now(),
+            'logic_type'            => $data['logic_type'] ?? 'SIMPLE',
+            'expression'            => $data['expression'] ?? null,
+            'created_at'            => now(),
+            'updated_at'            => now(),
         ]);
 
         return DB::table('tpr_rules')->where('id', $id)->first();
@@ -73,31 +79,39 @@ class RulesController extends Controller
     public function update($id, Request $r)
     {
         $data = $r->validate([
-            'type'                 => 'nullable|string',
-            'metric'               => 'nullable|string',
-            'code_pattern'         => 'nullable|string',
-            'window_days'          => 'nullable|integer',
-            'threshold'            => 'nullable|integer',
-            'cool_off_days'        => 'nullable|integer',
-            'auto_close_days'      => 'nullable|integer',
-            'cool_off_strategy'    => 'nullable|string',
-            'auto_reopen'          => 'nullable|boolean',
-            'scope'                => 'array',
-            'enabled'              => 'nullable|boolean',
-            'action'               => 'nullable|string',
-            'issue_priority'       => 'nullable|string',
-            'title_template'       => 'nullable|string',
-            'description_template' => 'nullable|string',
-            'logic_type'           => 'nullable|string',
-            'expression'           => 'nullable|string',
+            'type'                  => 'nullable|string',
+            'metric'                => 'nullable|string',
+            'code_pattern'          => 'nullable|string',
+            'window_days'           => 'nullable|integer',
+            'threshold'             => 'nullable|integer',
+            'cool_off_days'         => 'nullable|integer',
+            'auto_close_days'       => 'nullable|integer',
+            'cool_off_strategy'     => 'nullable|string',
+            'auto_reopen'           => 'nullable|boolean',
+            'reopen_cooldown_hours' => 'nullable|integer',
+            'escalation_levels'     => 'array',
+            'scope'                 => 'array',
+            'enabled'               => 'nullable|boolean',
+            'action'                => 'nullable|string',
+            'issue_priority'        => 'nullable|string',
+            'title_template'        => 'nullable|string',
+            'description_template'  => 'nullable|string',
+            'logic_type'            => 'nullable|string',
+            'expression'            => 'nullable|string',
         ]);
 
-        DB::table('tpr_rules')->where('id', $id)->update(array_merge($data, [
+        $payload = array_merge($data, [
             'scope'      => array_key_exists('scope', $data)
                 ? json_encode($data['scope'])
                 : DB::raw('scope'),
             'updated_at' => now(),
-        ]));
+        ]);
+
+        if (array_key_exists('escalation_levels', $data)) {
+            $payload['escalation_levels'] = json_encode($data['escalation_levels']);
+        }
+
+        DB::table('tpr_rules')->where('id', $id)->update($payload);
 
         return DB::table('tpr_rules')->where('id', $id)->first();
     }
@@ -121,7 +135,8 @@ class RulesController extends Controller
                 'r.threshold',
                 'r.logic_type',
                 'r.cool_off_strategy',
-                'r.auto_reopen'
+                'r.auto_reopen',
+                'r.reopen_cooldown_hours'
             );
 
         if ($r->filled('rule_id')) {
@@ -134,7 +149,7 @@ class RulesController extends Controller
             $q->where(
                 'a.triggered_at',
                 '>=',
-                now()->subDays((int)$r->input('days'))->toDateTimeString()
+                now()->subDays((int) $r->input('days'))->toDateTimeString()
             );
         }
 
