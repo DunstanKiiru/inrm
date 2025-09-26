@@ -11,12 +11,14 @@ class RulesController extends Controller
     public function index(Request $r)
     {
         $q = DB::table('tpr_rules');
+
         if ($r->filled('enabled')) {
-            $q->where('enabled', (bool)$r->input('enabled'));
+            $q->where('enabled', (bool) $r->input('enabled'));
         }
         if ($r->filled('type')) {
             $q->where('type', $r->input('type'));
         }
+
         return $q->orderByDesc('created_at')->paginate(100);
     }
 
@@ -30,6 +32,8 @@ class RulesController extends Controller
             'threshold'            => 'nullable|integer',
             'cool_off_days'        => 'nullable|integer',
             'auto_close_days'      => 'nullable|integer',
+            'cool_off_strategy'    => 'nullable|string',
+            'auto_reopen'          => 'nullable|boolean',
             'scope'                => 'array',
             'enabled'              => 'nullable|boolean',
             'action'               => 'nullable|string',
@@ -48,6 +52,8 @@ class RulesController extends Controller
             'threshold'            => $data['threshold'] ?? 3,
             'cool_off_days'        => $data['cool_off_days'] ?? 14,
             'auto_close_days'      => $data['auto_close_days'] ?? 7,
+            'cool_off_strategy'    => $data['cool_off_strategy'] ?? 'create_new',
+            'auto_reopen'          => $data['auto_reopen'] ?? true,
             'scope'                => json_encode($data['scope'] ?? null),
             'enabled'              => $data['enabled'] ?? true,
             'action'               => $data['action'] ?? 'create_issue',
@@ -74,6 +80,8 @@ class RulesController extends Controller
             'threshold'            => 'nullable|integer',
             'cool_off_days'        => 'nullable|integer',
             'auto_close_days'      => 'nullable|integer',
+            'cool_off_strategy'    => 'nullable|string',
+            'auto_reopen'          => 'nullable|boolean',
             'scope'                => 'array',
             'enabled'              => 'nullable|boolean',
             'action'               => 'nullable|string',
@@ -111,7 +119,9 @@ class RulesController extends Controller
                 'r.code_pattern',
                 'r.window_days',
                 'r.threshold',
-                'r.logic_type'
+                'r.logic_type',
+                'r.cool_off_strategy',
+                'r.auto_reopen'
             );
 
         if ($r->filled('rule_id')) {
