@@ -1,52 +1,34 @@
 <?php
-
-namespace App\Http\Controllers\Api;
-
-use App\Http\Controllers\Controller;
-use App\Models\TprRuleSuppression;
+namespace Inrm\TPR\Http\Controllers\Api;
+use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SuppressionsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $r)
     {
-        $query = TprRuleSuppression::query();
-
-        if ($request->filled('rule_id')) {
-            $query->where('rule_id', $request->rule_id);
-        }
-
-        if ($request->filled('vendor_id')) {
-            $query->where('vendor_id', $request->vendor_id);
-        }
-
-        return $query->paginate(50);
+        $q = DB::table('tpr_rule_suppressions');
+        if ($r->filled('rule_id')) $q->where('rule_id',$r->input('rule_id'));
+        if ($r->filled('vendor_id')) $q->where('vendor_id',$r->input('vendor_id'));
+        return $q->orderByDesc('until')->paginate(200);
     }
-
-    public function store(Request $request)
+    public function store(Request $r)
     {
-        $data = $request->validate([
-            'rule_id' => 'nullable|exists:tpr_rules,id',
-            'vendor_id' => 'nullable|exists:tpr_vendors,id',
-            'until' => 'required|date',
-            'reason' => 'nullable|string',
+        $data = $r->validate([
+            'rule_id'=>'nullable|integer','vendor_id'=>'nullable|integer',
+            'until'=>'required|date','reason'=>'nullable|string'
         ]);
-
-        $suppression = TprRuleSuppression::create($data);
-
-        return response()->json($suppression, 201);
+        $id = DB::table('tpr_rule_suppressions')->insertGetId([
+            'rule_id'=>$data['rule_id'] ?? null,'vendor_id'=>$data['vendor_id'] ?? null,
+            'until'=>$data['until'],'reason'=>$data['reason'] ?? null,
+            'created_at'=>now(),'updated_at'=>now()
+        ]);
+        return DB::table('tpr_rule_suppressions')->where('id',$id)->first();
     }
-
     public function destroy($id)
     {
-        $suppression = TprRuleSuppression::find($id);
-
-        if (!$suppression) {
-            return response()->json(['error' => 'Suppression not found'], 404);
-        }
-
-        $suppression->delete();
-
-        return response()->json(['message' => 'Suppression deleted']);
+        DB::table('tpr_rule_suppressions')->where('id',$id)->delete();
+        return ['ok'=>true];
     }
 }
