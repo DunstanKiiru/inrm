@@ -1,6 +1,6 @@
 <?php
 
-namespace Inrm\TPR;
+namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -8,8 +8,11 @@ class TPRServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // Merge default package config
-        $this->mergeConfigFrom(__DIR__ . '/../config/inrm_tpr.php', 'inrm_tpr');
+        // Merge default package config (can be overridden in app/config)
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/inrm_tpr.php',
+            'inrm_tpr'
+        );
     }
 
     public function boot(): void
@@ -26,7 +29,7 @@ class TPRServiceProvider extends ServiceProvider
                 \App\Console\TprAssessmentsOverdue::class,
             ]);
 
-            // Publish config file
+            // Allow publishing config file
             $this->publishes([
                 __DIR__ . '/../config/inrm_tpr.php' => config_path('inrm_tpr.php'),
             ], 'config');
