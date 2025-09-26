@@ -3,6 +3,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Assessment;
 use App\Models\AssessmentTemplate;
 use App\Models\AssessmentRound;
@@ -10,69 +11,62 @@ use App\Models\AssessmentResponse;
 
 class AssessmentController extends Controller
 {
-    public function index(Request $r)
+    /**
+     * List assessments for a vendor (TPR use-case)
+     */
+    public function vendorIndex($vendorId)
     {
-        $q = Assessment::with('template')->orderByDesc('id');
-        if ($r->filled('entity_type')) $q->where('entity_type', $r->entity_type);
-        if ($r->filled('entity_id')) $q->where('entity_id', $r->entity_id);
-        if ($r->filled('status')) $q->where('status', $r->status);
-        return $q->paginate(20);
+        return Assessment::with('template')
+            ->where('entity_type', 'vendor')
+            ->where('entity_id', $vendorId)
+            ->orderByDesc('id')
+            ->get();
     }
 
-    public function store(Request $r)
+    /**
+     * Start a vendor assessment (TPR style)
+     */
+    public function start($vendorId, Request $r)
     {
         $data = $r->validate([
             'template_id' => 'required|exists:assessment_templates,id',
-            'entity_type' => 'required|in:risk,org_unit',
-            'entity_id' => 'required|integer',
-            'title' => 'required|string',
-            'rounds' => 'nullable|integer|min:1',
-            'first_due_at' => 'nullable|date'
+            'due_at' => 'nullable|date'
         ]);
 
-        $ass = Assessment::create($data);
-        $rounds = max(1, (int)($data['rounds'] ?? 1));
+        $ass = Assessment::create([
+            'template_id' => $data['template_id'],
+            'entity_type' => 'vendor',
+            'entity_id' => $vendorId,
+            'title' => 'Vendor Assessment',
+            'status' => 'sent',
+        ]);
 
-        for ($i = 1; $i <= $rounds; $i++) {
-            AssessmentRound::create([
-                'assessment_id' => $ass->id,
-                'round_no' => $i,
-                'due_at' => $i === 1 ? ($data['first_due_at'] ?? null) : null,
-                'status' => 'pending'
-            ]);
-        }
+        AssessmentRound::create([
+            'assessment_id' => $ass->id,
+            'round_no' => 1,
+            'due_at' => $data['due_at'] ?? now()->addDays(14),
+            'status' => 'pending',
+        ]);
 
         return $ass->load('rounds');
     }
 
+    /**
+     * Show assessment with template + rounds + responses
+     */
     public function show(Assessment $assessment)
     {
-        return $assessment->load('template', 'rounds');
+        return $assessment->load('template', 'rounds.responses');
     }
 
-    public function update(Request $r, Assessment $assessment)
-    {
-        $assessment->update($r->all());
-        return $assessment->fresh();
-    }
-
-    public function destroy(Assessment $assessment)
-    {
-        $assessment->delete();
-        return response()->noContent();
-    }
-
-    // Rounds
-    public function rounds(Assessment $assessment)
-    {
-        return $assessment->rounds()->with('assignee')->orderBy('round_no')->get();
-    }
-
-    public function submitResponse(Request $r, AssessmentRound $round)
+    /**
+     * Submit responses for a round
+     */
+    public function submitResponses(Request $r, AssessmentRound $round)
     {
         $data = $r->validate([
-            'answers_json' => 'required',
-            'status' => 'nullable|string'
+            'answers_json' => 'required|json',
+            'status' => 'nullable|string',
         ]);
 
         $resp = AssessmentResponse::create([
@@ -82,18 +76,44 @@ class AssessmentController extends Controller
             'status' => $data['status'] ?? 'submitted',
         ]);
 
-        $round->update(['status' => 'submitted']);
+        $round->update(['status' => 'in_progress']);
         return $resp;
     }
 
-    public function responses(AssessmentRound $round)
+    /**
+     * Score an assessment (average of numeric scores in responses)
+     */
+    public function score(Assessment $assessment)
     {
-        return $round->responses()->with('submitter')->orderByDesc('id')->get();
-    }
+        $rows = AssessmentResponse::whereHas('round', fn($q) => $q->where('assessment_id', $assessment->id))
+            ->get();
 
-    public function setRoundStatus(Request $r, AssessmentRound $round)
-    {
-        $round->update($r->validate(['status' => 'required|string']));
-        return $round->fresh();
+        $allScores = [];
+        foreach ($rows as $row) {
+            $answers = json_decode($row->answers_json, true);
+            if (is_array($answers)) {
+                foreach ($answers as $ans) {
+                    if (isset($ans['score'])) {
+                        $allScores[] = (float)$ans['score'];
+                    }
+                }
+            }
+        }
+
+        $score = count($allScores) ? round(array_sum($allScores) / count($allScores), 1) : null;
+
+        $assessment->update([
+            'score' => $score,
+            'status' => 'scored',
+            'completed_at' => now(),
+        ]);
+
+        // Optional vendor residual update
+        if ($assessment->entity_type === 'vendor' && $score !== null) {
+            DB::table('tpr_vendors')->where('id', $assessment->entity_id)
+                ->update(['residual_score' => $score, 'updated_at' => now()]);
+        }
+
+        return ['score' => $score];
     }
 }

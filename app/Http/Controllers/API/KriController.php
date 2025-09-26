@@ -3,12 +3,18 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Kri;
 use App\Models\KriReading;
 use App\Models\KriBreach;
 
 class KriController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | GENERIC KRI (ELOQUENT, entity-based)
+    |--------------------------------------------------------------------------
+    */
     public function index(Request $r)
     {
         $q = Kri::query()->orderBy('title');
@@ -51,7 +57,7 @@ class KriController extends Controller
         return response()->noContent();
     }
 
-    // Readings
+    // ---- Readings ----
     public function readings(Kri $kri)
     {
         return $kri->readings()->orderBy('collected_at','desc')->limit(100)->get();
@@ -64,12 +70,59 @@ class KriController extends Controller
             'collected_at' => 'nullable|date',
             'source' => 'nullable|string'
         ]);
-        $row = $kri->readings()->create($data);
-        return $row;
+        return $kri->readings()->create($data);
     }
 
+    // ---- Breaches ----
     public function breaches(Kri $kri)
     {
         return $kri->breaches()->orderByDesc('id')->limit(50)->get();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | VENDOR-SPECIFIC KRI (TPR, table-based)
+    |--------------------------------------------------------------------------
+    */
+    public function vendorDefs($vendorId)
+    {
+        return DB::table('tpr_vendor_kri_defs')
+            ->where('vendor_id', $vendorId)
+            ->orderBy('code')
+            ->get();
+    }
+
+    public function vendorCreateDef($vendorId, Request $r)
+    {
+        $data = $r->validate([
+            'code'=>'required',
+            'name'=>'required',
+            'unit'=>'nullable',
+            'green_max'=>'nullable|numeric',
+            'amber_max'=>'nullable|numeric'
+        ]);
+        $id = DB::table('tpr_vendor_kri_defs')->insertGetId(array_merge($data, [
+            'vendor_id'=>$vendorId,
+            'created_at'=>now(),
+            'updated_at'=>now()
+        ]));
+        return DB::table('tpr_vendor_kri_defs')->where('id',$id)->first();
+    }
+
+    public function vendorTrend($vendorId, Request $r)
+    {
+        $days = (int)$r->input('days', 90);
+        $start = now()->subDays($days)->toDateString();
+        $rows = DB::select("
+            SELECT DATE(measured_at) as t, COUNT(*) as alerts
+            FROM tpr_vendor_kri_measures
+            WHERE vendor_id = ? AND measured_at >= ? AND status IN ('alert','breach')
+            GROUP BY DATE(measured_at) ORDER BY t ASC
+        ", [$vendorId, $start]);
+
+        return array_map(fn($row) => [
+            't' => $row->t,
+            'v' => (int)$row->alerts
+        ], $rows);
     }
 }

@@ -3,6 +3,20 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// ----------------------
+// INRM TPR Controllers
+// ----------------------
+use Inrm\TPR\Http\Controllers\Api\VendorsController as TprVendorsController;
+use Inrm\TPR\Http\Controllers\Api\AssessmentsController as TprAssessmentsController;
+use Inrm\TPR\Http\Controllers\Api\AssessmentTemplatesController as TprAssessmentTemplatesController;
+use Inrm\TPR\Http\Controllers\Api\KriController as TprKriController;
+use Inrm\TPR\Http\Controllers\Api\SlaController as TprSlaController;
+use Inrm\TPR\Http\Controllers\Api\ImportsController as TprImportsController;
+use Inrm\TPR\Http\Controllers\Api\PortfolioController as TprPortfolioController;
+
+// ----------------------
+// Core API Controllers
+// ----------------------
 use App\Http\Controllers\API\RiskCategoryController;
 use App\Http\Controllers\API\RiskCauseController;
 use App\Http\Controllers\API\RiskConsequenceController;
@@ -61,6 +75,46 @@ Route::get('/ping', function () {
 // Authenticated routes
 // ----------------------
 Route::middleware('auth:sanctum')->group(function () {
+
+    // ----------------------
+    // INRM TPR module
+    // ----------------------
+    Route::prefix('tpr')->group(function () {
+        // Vendors
+        Route::get('vendors', [TprVendorsController::class, 'index']);
+        Route::post('vendors', [TprVendorsController::class, 'store']);
+        Route::get('vendors/{id}', [TprVendorsController::class, 'show']);
+        Route::put('vendors/{id}', [TprVendorsController::class, 'update']);
+        Route::post('vendors/{id}/risk-rating', [TprVendorsController::class, 'setRiskRating']);
+        Route::get('vendors/{id}/overview', [TprVendorsController::class, 'overview']);
+
+        // Assessment templates & runs
+        Route::get('templates', [TprAssessmentTemplatesController::class, 'index']);
+        Route::post('templates', [TprAssessmentTemplatesController::class, 'store']);
+        Route::get('templates/{id}', [TprAssessmentTemplatesController::class, 'show']);
+
+        Route::get('vendors/{id}/assessments', [TprAssessmentsController::class, 'index']);
+        Route::post('vendors/{id}/assessments', [TprAssessmentsController::class, 'start']);
+        Route::get('assessments/{id}', [TprAssessmentsController::class, 'show']);
+        Route::post('assessments/{id}/responses', [TprAssessmentsController::class, 'submitResponses']);
+        Route::post('assessments/{id}/score', [TprAssessmentsController::class, 'score']);
+
+        // KRIs
+        Route::get('vendors/{id}/kri/defs', [TprKriController::class, 'defs']);
+        Route::post('vendors/{id}/kri/defs', [TprKriController::class, 'createDef']);
+        Route::get('vendors/{id}/kri/trend', [TprKriController::class, 'trend']);
+        Route::post('vendors/{id}/kri/import-csv', [TprImportsController::class, 'kriCsv']); // multipart or raw text
+
+        // SLAs
+        Route::get('vendors/{id}/sla/defs', [TprSlaController::class, 'defs']);
+        Route::post('vendors/{id}/sla/defs', [TprSlaController::class, 'createDef']);
+        Route::get('vendors/{id}/sla/trend', [TprSlaController::class, 'trend']);
+        Route::post('vendors/{id}/sla/ingest', [TprSlaController::class, 'ingest']); // json body or csv
+
+        // Portfolio
+        Route::get('portfolio/overview', [TprPortfolioController::class, 'overview']);
+        Route::get('portfolio/top', [TprPortfolioController::class, 'top']);
+    });
 
     // ----------------------
     // User info & logout
@@ -161,7 +215,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/controls/{control}/analytics/recent-executions', [ControlAnalyticsController::class, 'recentExecutions']);
 
     // ----------------------
-    // Assessments
+    // Assessments (core)
     // ----------------------
     Route::apiResource('assessment-templates', AssessmentTemplateController::class);
     Route::apiResource('assessments', AssessmentController::class);
@@ -171,7 +225,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/assessment-rounds/{round}/status', [AssessmentController::class, 'setRoundStatus']);
 
     // ----------------------
-    // KRIs
+    // KRIs (core)
     // ----------------------
     Route::get('/kris', [KriController::class, 'index']);
     Route::post('/kris', [KriController::class, 'store']);
@@ -241,8 +295,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/risk-appetite/profiles/{profile}/thresholds', [RiskAppetiteController::class, 'storeThreshold']);
     Route::get('/risks/{risk}/breaches', [RiskAppetiteController::class, 'breaches']);
 
-    //Me
-
-     Route::get('/me', [MeController::class, 'me']);
-
+    // ----------------------
+    // Me
+    // ----------------------
+    Route::get('/me', [MeController::class, 'me']);
 });
